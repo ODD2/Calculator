@@ -291,6 +291,7 @@ BigNum operator/(const BigNum& lhs, const BigNum& rhs) {
 #if DEBUG >=2
 		cout << "BigNum::operator/():" << endl << "lhs = " << lhs << " , rhs = 0" << endl << "Return BigNum(\"0\")" << endl;
 #endif
+		cout << "Error! Denominator has 0, Returning BigNum(0)" << endl;
 		return move(Zero);
 	}
 

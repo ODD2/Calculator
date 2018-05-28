@@ -25,6 +25,7 @@ Decimal CalcObj_pos::Operate(vector<BaseCalcObj*> * Obj_list, int index) const {
 
 
 void CalcObj_pos::Divide(vector<BaseCalcObj*> * Origin, int delimiter, vector<BaseCalcObj*> *& lhs, vector<BaseCalcObj*>*& rhs) const {
+	delete (*Origin)[delimiter];
 	Origin->erase(Origin->begin() + delimiter);
 	lhs = nullptr;
 

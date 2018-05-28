@@ -27,6 +27,7 @@ Decimal CalcObj_factorial::Operate(vector<BaseCalcObj*> * Obj_list, int index) c
 
 
 void CalcObj_factorial::Divide(vector<BaseCalcObj*> * Origin, int delimiter, vector<BaseCalcObj*> *& lhs, vector<BaseCalcObj*>*& rhs) const {
+	delete (*Origin)[delimiter];
 	Origin->erase(Origin->begin() + delimiter);
 	rhs = nullptr;
 

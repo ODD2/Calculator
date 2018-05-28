@@ -122,6 +122,7 @@
     <ClCompile Include="CalcObj_plus.cpp" />
     <ClCompile Include="CalcObj_pos.cpp" />
     <ClCompile Include="CalcObj_power.cpp" />
+    <ClCompile Include="CalcObj_variable.cpp" />
     <ClCompile Include="Decimal.cpp" />
     <ClCompile Include="Interpreter.cpp" />
     <ClCompile Include="Source.cpp" />
@@ -139,6 +140,7 @@
     <ClInclude Include="CalcObj_plus.h" />
     <ClInclude Include="CalcObj_pos.h" />
     <ClInclude Include="CalcObj_power.h" />
+    <ClInclude Include="CalcObj_variable.h" />
     <ClInclude Include="Decimal.h" />
     <ClInclude Include="GLOBALSETTING.h" />
     <ClInclude Include="IncludeCalcObj.h" />

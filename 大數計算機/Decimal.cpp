@@ -171,12 +171,12 @@ Decimal operator*(const Decimal& lhs, const Decimal& rhs) {
 
 	map<BigNum , double>::const_iterator rhs_numerator_it = rhs.numerator.begin();
 	for (; rhs_numerator_it != rhs.numerator.end(); rhs_numerator_it++) {
-		Result.numerator[rhs_numerator_it->first] += 1;
+		Result.numerator[rhs_numerator_it->first] += rhs_numerator_it->second;
 	}
 
 	map<BigNum , double>::const_iterator rhs_denominator_it = rhs.denominator.begin();
 	for (; rhs_denominator_it != rhs.denominator.end(); rhs_denominator_it++) {
-		Result.denominator[rhs_denominator_it->first] += 1;
+		Result.denominator[rhs_denominator_it->first] += rhs_denominator_it->second;
 	}
 
 	Result.Simplification();
@@ -205,7 +205,7 @@ Decimal operator^(const Decimal& lhs, const Decimal& rhs) {
 
 	if (fmod(power,0.5) != 0 ) {
 #if DEBUG >= 2
-		cout << "Decimal::operator^,rhs/0.5 != 0." << endl;
+		cout << "Decimal::operator^,rhs/0.5 != 0 , rhs=" << power << endl;
 #endif
 		return move(Decimal());
 	}
@@ -258,7 +258,7 @@ ostream& operator << (ostream& os, const Decimal& rhs) {
 	
 #ifdef DEBUG
 	rhs.Combination(os);
-	os << "Evaluate:";
+	os << ",Evaluate:";
 #endif // 
 	os <<  rhs.Evaluate();
 

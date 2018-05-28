@@ -40,6 +40,7 @@ bool BaseCalcObj::isOperator() const {
 
 //devide the formula , remove operator
 void BaseCalcObj::Divide(vector<BaseCalcObj*> * Origin, int delimiter, vector<BaseCalcObj*> *& lhs, vector<BaseCalcObj*>*& rhs) const{
+	delete (*Origin)[delimiter];
 	Origin->erase(Origin->begin() + delimiter);
 
 	if (Origin->size() == 1) {
@@ -59,10 +60,13 @@ void BaseCalcObj::Divide(vector<BaseCalcObj*> * Origin, int delimiter, vector<Ba
 }
 
 int BaseCalcObj::Prior_FindLowest(const vector<BaseCalcObj*> * Origin ) const  {
+	if (Origin->size() == 0) {
+		cout << "Error! Formula is Empty!!" << endl;
+	}
 	int ret_priority = INT32_MAX;
-	int ret_index = Origin->size()-1;
+	int ret_index = 0;
 
-	for (int i = Origin->size() - 1; i--; i >= 0) {
+	for (int i = Origin->size()-1; i >= 0 ; i--) {
 		if ((*Origin)[i]->isOperator())
 		{
 			if ((*Origin)[i]->priority < ret_priority) {
