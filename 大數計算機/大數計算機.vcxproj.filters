@@ -1,0 +1,120 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="原始程式檔">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="標頭檔">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="資源檔">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="原始程式檔\CalcObj">
+      <UniqueIdentifier>{b32addf6-9b7d-4610-b32c-9c2c7853d9ed}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="標頭檔\CalcObj">
+      <UniqueIdentifier>{854c57b4-5626-441d-8b32-fc5c7bae31cb}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Source.cpp">
+      <Filter>資源檔</Filter>
+    </ClCompile>
+    <ClCompile Include="BigNum.cpp">
+      <Filter>原始程式檔</Filter>
+    </ClCompile>
+    <ClCompile Include="Decimal.cpp">
+      <Filter>原始程式檔</Filter>
+    </ClCompile>
+    <ClCompile Include="Interpreter.cpp">
+      <Filter>原始程式檔</Filter>
+    </ClCompile>
+    <ClCompile Include="BaseCalcObj.cpp">
+      <Filter>原始程式檔\CalcObj</Filter>
+    </ClCompile>
+    <ClCompile Include="CalcObj_plus.cpp">
+      <Filter>原始程式檔\CalcObj</Filter>
+    </ClCompile>
+    <ClCompile Include="CalcObj_power.cpp">
+      <Filter>原始程式檔\CalcObj</Filter>
+    </ClCompile>
+    <ClCompile Include="CalcObj_factorial.cpp">
+      <Filter>原始程式檔\CalcObj</Filter>
+    </ClCompile>
+    <ClCompile Include="CalcObj_minus.cpp">
+      <Filter>原始程式檔\CalcObj</Filter>
+    </ClCompile>
+    <ClCompile Include="CalcObj_multi.cpp">
+      <Filter>原始程式檔\CalcObj</Filter>
+    </ClCompile>
+    <ClCompile Include="CalcObj_neg.cpp">
+      <Filter>原始程式檔\CalcObj</Filter>
+    </ClCompile>
+    <ClCompile Include="CalcObj_pos.cpp">
+      <Filter>原始程式檔\CalcObj</Filter>
+    </ClCompile>
+    <ClCompile Include="CalcObj_div.cpp">
+      <Filter>原始程式檔\CalcObj</Filter>
+    </ClCompile>
+    <ClCompile Include="CalcObj_num.cpp">
+      <Filter>原始程式檔\CalcObj</Filter>
+    </ClCompile>
+    <ClCompile Include="CalcObj_assign.cpp">
+      <Filter>原始程式檔\CalcObj</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="BigNum.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="Decimal.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="Interpreter.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="BaseCalcObj.h">
+      <Filter>標頭檔\CalcObj</Filter>
+    </ClInclude>
+    <ClInclude Include="CalcObj_plus.h">
+      <Filter>標頭檔\CalcObj</Filter>
+    </ClInclude>
+    <ClInclude Include="CalcObj_power.h">
+      <Filter>標頭檔\CalcObj</Filter>
+    </ClInclude>
+    <ClInclude Include="CalcObj_div.h">
+      <Filter>標頭檔\CalcObj</Filter>
+    </ClInclude>
+    <ClInclude Include="CalcObj_factorial.h">
+      <Filter>標頭檔\CalcObj</Filter>
+    </ClInclude>
+    <ClInclude Include="CalcObj_minus.h">
+      <Filter>標頭檔\CalcObj</Filter>
+    </ClInclude>
+    <ClInclude Include="CalcObj_multi.h">
+      <Filter>標頭檔\CalcObj</Filter>
+    </ClInclude>
+    <ClInclude Include="CalcObj_neg.h">
+      <Filter>標頭檔\CalcObj</Filter>
+    </ClInclude>
+    <ClInclude Include="CalcObj_pos.h">
+      <Filter>標頭檔\CalcObj</Filter>
+    </ClInclude>
+    <ClInclude Include="CalcObj_num.h">
+      <Filter>標頭檔\CalcObj</Filter>
+    </ClInclude>
+    <ClInclude Include="GLOBALSETTING.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="IncludeCalcObj.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="CalcObj_assign.h">
+      <Filter>標頭檔\CalcObj</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
