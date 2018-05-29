@@ -111,9 +111,7 @@ Decimal operator+(const Decimal& lhs, const Decimal& rhs) {
 
 	Result.Simplification();
 
-#ifdef WEIRD_HOMEWORK_SETTING
 	Result.pureInt = (lhs.pureInt && rhs.pureInt);
-#endif
 	return move(Result);
 }
 
@@ -159,9 +157,9 @@ Decimal operator-(const Decimal& lhs, const Decimal& rhs) {
 
 	Result.Simplification();
 
-#ifdef WEIRD_HOMEWORK_SETTING
+
 	Result.pureInt = (lhs.pureInt && rhs.pureInt);
-#endif
+
 
 	return move(Result);
 }
@@ -182,22 +180,21 @@ Decimal operator*(const Decimal& lhs, const Decimal& rhs) {
 
 	Result.Simplification();
 
-#ifdef WEIRD_HOMEWORK_SETTING
 	Result.pureInt = (lhs.pureInt && rhs.pureInt);
-#endif
+
 
 	return  move(Result);
 }
 
 Decimal operator/(const Decimal& lhs,const Decimal& rhs) {
 
-#ifdef WEIRD_HOMEWORK_SETTING
+
 	if (lhs.pureInt && rhs.pureInt) 
 	{
 		cout << "Warning: Calculating Division of 2 Pure Integers." << endl;
 		return Decimal(BigNum(0));
 	}
-#endif
+
 
 	Decimal Result = lhs;
 
@@ -233,12 +230,12 @@ Decimal operator^(const Decimal& lhs, const Decimal& rhs) {
 	}
 	else {
 
-#ifdef WEIRD_HOMEWORK_SETTING
+
 		if (power < O && lhs.pureInt) {
 			cout << "Warning: Calculating Negative Power of a Pure Integer." << endl;
 			return move(O);
 		}
-#endif // WEIRD_HOMEWORK_SETTING
+
 
 		
 
