@@ -1017,3 +1017,15 @@ BigNum BigNum::GCD(const BigNum& rhs) const{
 		return move(cp_RHS);
 	}
 }
+
+BigNum BigNum::PureInt() const {
+	BigNum Result = move(this->FloatPoint_Cut(0));
+	Result.pureInt = true;
+	return move(Result);
+}
+
+BigNum BigNum::xPureInt() const {
+	BigNum Result = *this;
+	Result.pureInt = false;
+	return move(Result);
+}

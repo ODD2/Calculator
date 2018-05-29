@@ -69,6 +69,12 @@ public:
 
 	BigNum GCD(const BigNum&) const;
 
+	BigNum FloatPoint_Swap(int)const;
+	BigNum FloatPoint_Cut(int)const;
+
+	BigNum PureInt() const;
+	BigNum xPureInt() const;
+
 protected:
 	vector<int> value;
 	int floatPosition = 0;
@@ -85,10 +91,5 @@ protected:
 	bool Num_CheckClose();
 	bool Num_CheckCloseTo1();
 	bool Num_CheckCloseTo0();
-	
-	
-	BigNum FloatPoint_Swap(int)const;
-	BigNum FloatPoint_Cut(int)const;
-
 };
 

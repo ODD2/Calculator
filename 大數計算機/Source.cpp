@@ -14,7 +14,7 @@ int main() {
 		while (1) {
 		getline(cin, command);
 		if (!cin) break;
-		cout << Decimal(command) << endl;;
+		cout << Decimal(command) << endl;
 
 		/*vector<BaseCalcObj*> *lol = Interpreter::Converter(command);
 		int index = BaseCalcObj::Prior_FindLowest(lol);

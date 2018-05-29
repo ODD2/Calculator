@@ -23,6 +23,7 @@ public:
 	~Decimal();
 	Decimal(const BigNum &);
 	Decimal& operator=(const Decimal&);
+	Decimal& operator=(const BigNum & BN);
 
 	friend Decimal operator+(const Decimal&,const Decimal&);
 	friend Decimal operator-(const Decimal&, const Decimal&);
@@ -40,6 +41,7 @@ public:
 
 	BigNum Evaluate() const;
 	void Combination(ostream&) const;
+	bool isPureInt() { return pureInt; };
 
 protected:
 	map<BigNum , BigNum> numerator;

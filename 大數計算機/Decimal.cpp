@@ -61,6 +61,11 @@ Decimal& Decimal::operator=(const Decimal& Dec) {
 	return *this;
 }
 
+Decimal& Decimal::operator=(const BigNum & BN) {
+	*this = move(Decimal(BN));
+	return *this;
+}
+
 
 /* ========== Arithmetics ========== */
 Decimal operator+(const Decimal& lhs, const Decimal& rhs) {
