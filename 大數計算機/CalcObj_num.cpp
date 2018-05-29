@@ -37,21 +37,7 @@ Decimal CalcObj_num::Operate(vector<BaseCalcObj*> * Origin, int index)const  {
 	}
 
 	delete (*Origin)[0];
-	BigNum In(id);
-	Decimal Result;
+	
 
-	if (In.floatPosition) {
-		int swappos = In.floatPosition;
-		
-		Result.numerator[In.FloatPoint_Swap(0)] = 1;
-		Result.denominator[BigNum("1").FloatPoint_Swap(swappos*(-1))] = 1;
-	}
-
-	else {
-		Result.numerator[In] = 1;
-		Result.denominator[BigNum("1")] = 1;
-	}
-
-
-	return move(Result);
+	return move(Decimal(BigNum(id)));
 }

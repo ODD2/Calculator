@@ -44,6 +44,7 @@ public:
 protected:
 	map<BigNum , BigNum> numerator;
 	map<BigNum , BigNum> denominator;
+	bool pureInt = true;
 
 	void Init(const BigNum& In) {
 		Clear();

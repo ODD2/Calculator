@@ -18,18 +18,6 @@ Decimal::~Decimal()
 
 Decimal::Decimal(string str) {
 	*this = Decimal(Interpreter::Converter(str));
-
-	//BigNum In(str);
-
-	//if (In.floatPosition) {
-	//	int swappos = In.floatPosition;
-	//	numerator[In.FloatPoint_Swap(0)]=1;
-	//	denominator[BigNum("1").FloatPoint_Swap(swappos*(-1))] = 1;
-	//}
-	//else {
-	//	numerator[In] = 1;
-	//	denominator[BigNum("1")] = 1;
-	//}
 }
 
 Decimal::Decimal(vector<BaseCalcObj*>* rhs) {
@@ -40,11 +28,13 @@ Decimal::Decimal(vector<BaseCalcObj*>* rhs) {
 Decimal::Decimal(const Decimal& Dec) {
 	numerator = Dec.numerator;
 	denominator = Dec.denominator;
+	pureInt = Dec.pureInt;
 }
 
 Decimal::Decimal(Decimal&& Dec)  {
 	numerator = move(Dec.numerator);
 	denominator = move(Dec.denominator);
+	pureInt = Dec.pureInt;
 }
 
 Decimal::Decimal(const BigNum& rhs) {
@@ -58,7 +48,7 @@ Decimal::Decimal(const BigNum& rhs) {
 		numerator[rhs] = ONE;
 		denominator[ONE] = ONE;
 	}
-
+	pureInt = rhs.pureInt;
 }
 
 
@@ -67,6 +57,7 @@ Decimal::Decimal(const BigNum& rhs) {
 Decimal& Decimal::operator=(const Decimal& Dec) {
 	numerator = Dec.numerator;
 	denominator = Dec.denominator;
+	pureInt = Dec.pureInt;
 	return *this;
 }
 
@@ -115,6 +106,9 @@ Decimal operator+(const Decimal& lhs, const Decimal& rhs) {
 
 	Result.Simplification();
 
+#ifdef WEIRD_HOMEWORK_SETTING
+	Result.pureInt = (lhs.pureInt && rhs.pureInt);
+#endif
 	return move(Result);
 }
 
@@ -160,10 +154,15 @@ Decimal operator-(const Decimal& lhs, const Decimal& rhs) {
 
 	Result.Simplification();
 
+#ifdef WEIRD_HOMEWORK_SETTING
+	Result.pureInt = (lhs.pureInt && rhs.pureInt);
+#endif
+
 	return move(Result);
 }
 
 Decimal operator*(const Decimal& lhs, const Decimal& rhs) {
+	
 	Decimal Result = lhs;
 
 	map<BigNum , BigNum>::const_iterator rhs_numerator_it = rhs.numerator.begin();
@@ -177,10 +176,24 @@ Decimal operator*(const Decimal& lhs, const Decimal& rhs) {
 	}
 
 	Result.Simplification();
+
+#ifdef WEIRD_HOMEWORK_SETTING
+	Result.pureInt = (lhs.pureInt && rhs.pureInt);
+#endif
+
 	return  move(Result);
 }
 
 Decimal operator/(const Decimal& lhs,const Decimal& rhs) {
+
+#ifdef WEIRD_HOMEWORK_SETTING
+	if (lhs.pureInt && rhs.pureInt) 
+	{
+		cout << "Warning: Calculating Division of 2 Pure Integers." << endl;
+		return Decimal(BigNum(0));
+	}
+#endif
+
 	Decimal Result = lhs;
 
 	map<BigNum , BigNum>::const_iterator rhs_numerator_it = rhs.numerator.begin();
@@ -194,6 +207,7 @@ Decimal operator/(const Decimal& lhs,const Decimal& rhs) {
 	}
 
 	Result.Simplification();
+	Result.pureInt = false;
 	return  move(Result);
 }
 
@@ -213,6 +227,16 @@ Decimal operator^(const Decimal& lhs, const Decimal& rhs) {
 		return move(Decimal());
 	}
 	else {
+
+#ifdef WEIRD_HOMEWORK_SETTING
+		if (power < O && lhs.pureInt) {
+			cout << "Warning: Calculating Negative Power of a Pure Integer." << endl;
+			return move(O);
+		}
+#endif // WEIRD_HOMEWORK_SETTING
+
+		
+
 		Decimal Result = lhs;
 		
 		map<BigNum , BigNum>::iterator Result_it = Result.numerator.begin();
