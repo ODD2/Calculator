@@ -127,7 +127,6 @@ BigNum operator+(const BigNum& lhs, const BigNum& rhs) {
 	BigNum Result;
 
 	if (!lhs.sign&&rhs.sign) {
-
 		return operator-(rhs,lhs.Sign_Pos());
 	}
 	else if (lhs.sign&&!rhs.sign) {
@@ -138,9 +137,6 @@ BigNum operator+(const BigNum& lhs, const BigNum& rhs) {
 		Result.sign = false;
 	}
 
-
-
-	
 	int lhsIntSize = lhs.value.size() - lhs.floatPosition;
 	int rhsIntSize = rhs.value.size() - rhs.floatPosition;
 	
@@ -259,7 +255,16 @@ BigNum operator-(const BigNum& lhs, const BigNum& rhs) {
 
 BigNum operator*(const BigNum& lhs, const BigNum& rhs) {
 	BigNum Result;
+	BigNum O("0");
+
+	//Special Cases
+	if (lhs.Sign_Pos() == O || rhs.Sign_Pos() == O) {
+		return move(O);
+	}
+
+	//set Sign
 	Result.sign = !(lhs.sign ^ rhs.sign);
+
 	//get floatpoint
 	Result.floatPosition = lhs.floatPosition + rhs.floatPosition;
 
@@ -278,22 +283,21 @@ BigNum operator*(const BigNum& lhs, const BigNum& rhs) {
 
 BigNum operator/(const BigNum& lhs, const BigNum& rhs) {
 	BigNum Zero("0");
-	
 
-	
-	if (lhs == Zero) {
-#if DEBUG >=5
-		cout << "BigNum::operator/():" << endl << "lhs = 0 , rhs = " << rhs << endl;
-#endif
-		return move(Zero);
-	}
-	else if (rhs == Zero) {
+	if (rhs.Sign_Pos() == Zero) {
 #if DEBUG >=2
 		cout << "BigNum::operator/():" << endl << "lhs = " << lhs << " , rhs = 0" << endl << "Return BigNum(\"0\")" << endl;
 #endif
 		cout << "Error! Denominator has 0, Returning BigNum(0)" << endl;
 		return move(Zero);
 	}
+	else if (lhs.Sign_Pos() == Zero) {
+#if DEBUG >=5
+		cout << "BigNum::operator/():" << endl << "lhs = 0 , rhs = " << rhs << endl;
+#endif
+		return move(Zero);
+	}
+	
 
 	BigNum Result;
 
@@ -372,6 +376,23 @@ BigNum operator/(const BigNum& lhs, const BigNum& rhs) {
 }
 
 BigNum operator%(const BigNum& lhs, const BigNum& rhs) {
+	BigNum Zero("0");
+
+	if (lhs.Sign_Pos() == Zero) {
+#if DEBUG >=5
+		cout << "BigNum::operator%():" << endl << "lhs = 0"<< endl;
+#endif
+		return move(Zero);
+	}
+	else if (rhs.Sign_Pos() == Zero) {
+#if DEBUG >=2
+		cout << "BigNum::operator%():" << endl << "lhs = " << lhs << " , rhs = 0" << endl << "Return (lhs)" << endl;
+#endif
+		cout << "Modding Zero!" << endl;
+		return lhs;
+	}
+
+
 	BigNum Quotient = lhs / rhs;
 	BigNum Result = lhs - rhs * Quotient.FloatPoint_Cut(0);
 
@@ -391,11 +412,11 @@ BigNum operator^(const BigNum& lhs, const BigNum& rhs) {
 
 
 	//Special Cases;
-	if (lhs == Zero) {
-		return move(BigNum("0"));
-	}
-	else if (rhs == Zero) {
+	if (rhs.Sign_Pos() == Zero) {
 		return move(BigNum("1"));
+	}
+	else if (lhs.Sign_Pos() == Zero) {
+		return move(BigNum("0"));
 	}
 	else if (lhs == One) {
 		return move(BigNum("1"));
@@ -403,8 +424,6 @@ BigNum operator^(const BigNum& lhs, const BigNum& rhs) {
 	else if (rhs == One) {
 		return lhs;
 	}
-
-
 	//不是0.5整數倍
 	else if (_0_5_times.floatPosition != 0) {
 #if DEBUG>=5
@@ -424,7 +443,7 @@ BigNum operator^(const BigNum& lhs, const BigNum& rhs) {
 	BigNum Result("1");
 
 	//需要根號
-	if (_0_5_times % BigNum("2") != Zero)
+	if (_0_5_times % Two != Zero)
 	{
 		/*-----------牛頓求值法-----------*/
 
@@ -447,8 +466,7 @@ BigNum operator^(const BigNum& lhs, const BigNum& rhs) {
 			Root = NewtonMethod;
 		}
 		Result = Result *  Root;
-	}
-		
+	}	
 	//整數次方
 	for (; _0_5_times >= Two ; ) {
 		Result = Result * lhs;
@@ -487,6 +505,9 @@ BigNum operator!(const BigNum& lhs) {
 		cout << "BigNum::operator!(),lhs < 0" << lhs.floatPosition << endl;
 		cout << "BigNum::operator!(),lhs=" << lhs << endl;
 #endif // DEBUG>=3
+	}
+	else if (lhs == BigNum("0")) {
+		return move(BigNum("1"));
 	}
 
 	BigNum Current = lhs;

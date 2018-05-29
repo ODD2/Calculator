@@ -4,13 +4,16 @@
 
 CalcObj_assign::CalcObj_assign()
 {
+	priority = ASSIGN;
 }
 
 CalcObj_assign::~CalcObj_assign()
 {
 }
 
-CalcObj_assign::CalcObj_assign(string identity) :BaseCalcObj(identity) {};
+CalcObj_assign::CalcObj_assign(string identity) :BaseCalcObj(identity) {
+	priority = ASSIGN;
+};
 
 Decimal CalcObj_assign::Operate(vector<BaseCalcObj*> * Obj_list, int index) const {
 	if (index != 1) {

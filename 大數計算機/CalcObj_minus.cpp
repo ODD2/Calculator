@@ -3,13 +3,16 @@
 
 CalcObj_minus::CalcObj_minus()
 {
+	priority = ADD;
 }
-
-CalcObj_minus::CalcObj_minus(string identity) :BaseCalcObj(identity) {};
 
 CalcObj_minus::~CalcObj_minus()
 {
 }
+
+CalcObj_minus::CalcObj_minus(string identity) :BaseCalcObj(identity) {
+	priority = ADD;
+};
 
 
 Decimal CalcObj_minus::Operate(vector<BaseCalcObj*> * Obj_list, int index) const {

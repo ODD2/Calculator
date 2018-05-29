@@ -3,16 +3,16 @@
 
 CalcObj_power::CalcObj_power()
 {
+	priority = POWER;
 }
-
 
 CalcObj_power::~CalcObj_power()
 {
 }
 
-
-
-CalcObj_power::CalcObj_power(string identity) :BaseCalcObj(identity) {};
+CalcObj_power::CalcObj_power(string identity) :BaseCalcObj(identity) {
+	priority = POWER;
+};
 
 Decimal CalcObj_power::Operate(vector<BaseCalcObj*> * Obj_list, int index) const {
 	vector<BaseCalcObj*> * lhs;

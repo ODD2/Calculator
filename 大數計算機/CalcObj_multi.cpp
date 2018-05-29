@@ -4,6 +4,7 @@
 
 CalcObj_multi::CalcObj_multi()
 {
+	priority = MULTIPLY;
 }
 
 
@@ -11,7 +12,9 @@ CalcObj_multi::~CalcObj_multi()
 {
 }
 
-CalcObj_multi::CalcObj_multi(string identity) :BaseCalcObj(identity) {};
+CalcObj_multi::CalcObj_multi(string identity) :BaseCalcObj(identity) {
+	priority = MULTIPLY;
+};
 
 Decimal CalcObj_multi::Operate(vector<BaseCalcObj*> * Obj_list, int index) const {
 	vector<BaseCalcObj*> * lhs;

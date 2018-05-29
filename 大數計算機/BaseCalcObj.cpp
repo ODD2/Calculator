@@ -7,11 +7,18 @@ BaseCalcObj::BaseCalcObj()
 }
 
 BaseCalcObj::BaseCalcObj(string identity) {
+	if(identity.size())
 	this->identity = identity;
 }
 
 BaseCalcObj::~BaseCalcObj()
 {
+}
+
+BaseCalcObj& BaseCalcObj::operator= (BaseCalcObj& rhs) {
+	priority = rhs.priority;
+	identity = rhs.identity;
+	return *this;
 }
 
 void BaseCalcObj::PriorFall() {
@@ -39,7 +46,7 @@ bool BaseCalcObj::isOperator() const {
 }
 
 //devide the formula , remove operator
-void BaseCalcObj::Divide(vector<BaseCalcObj*> * Origin, int delimiter, vector<BaseCalcObj*> *& lhs, vector<BaseCalcObj*>*& rhs) const{
+void BaseCalcObj::Divide(vector<BaseCalcObj*> * Origin, int delimiter, vector<BaseCalcObj*> *& lhs, vector<BaseCalcObj*>*& rhs) const	{
 	delete (*Origin)[delimiter];
 	Origin->erase(Origin->begin() + delimiter);
 
@@ -59,7 +66,7 @@ void BaseCalcObj::Divide(vector<BaseCalcObj*> * Origin, int delimiter, vector<Ba
 	delete Origin;
 }
 
-int BaseCalcObj::Prior_FindLowest(const vector<BaseCalcObj*> * Origin ) const  {
+int BaseCalcObj::Prior_FindLowest(const vector<BaseCalcObj*> * Origin ) {
 	if (Origin->size() == 0) {
 		cout << "Error! Formula is Empty!!" << endl;
 	}

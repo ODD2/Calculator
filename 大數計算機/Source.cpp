@@ -11,13 +11,14 @@ using namespace std;
 
 int main() {
 	string command;
-	while (1) {
+		while (1) {
 		getline(cin, command);
 		if (!cin) break;
-		vector<BaseCalcObj*> *lol = Interpreter::Converter(command);
+		cout << Decimal(command) << endl;;
 
-		int index = CalcObj_num().Prior_FindLowest(lol);
-		cout << (*lol)[index]->Operate(lol, index).Evaluate() << endl;
+		/*vector<BaseCalcObj*> *lol = Interpreter::Converter(command);
+		int index = BaseCalcObj::Prior_FindLowest(lol);
+		cout << (*lol)[index]->Operate(lol, index) << endl;*/
 	}
 	
 	//cout << (Decimal("123") / Decimal("0")).Evaluate() << endl;

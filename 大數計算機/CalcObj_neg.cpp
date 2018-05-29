@@ -4,6 +4,7 @@
 
 CalcObj_neg::CalcObj_neg()
 {
+	priority = SIGN;
 }
 
 
@@ -11,7 +12,9 @@ CalcObj_neg::~CalcObj_neg()
 {
 }
 
-CalcObj_neg::CalcObj_neg(string identity) :BaseCalcObj(identity) {};
+CalcObj_neg::CalcObj_neg(string identity) :BaseCalcObj(identity) {
+	priority = SIGN;
+};
 
 Decimal CalcObj_neg::Operate(vector<BaseCalcObj*> * Obj_list, int index) const {
 	vector<BaseCalcObj*> * lhs;

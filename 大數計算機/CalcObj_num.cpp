@@ -5,13 +5,17 @@
 
 CalcObj_num::CalcObj_num()
 {
-}
+	priority = NUM;
 
-CalcObj_num::CalcObj_num(string identity) :BaseCalcObj(identity) {};
+}
 
 CalcObj_num::~CalcObj_num()
 {
 }
+
+CalcObj_num::CalcObj_num(string identity) :BaseCalcObj(identity) {
+	priority = NUM;
+};
 
 bool CalcObj_num::isOperator() const {
 	return false;
@@ -25,10 +29,13 @@ Decimal CalcObj_num::Operate(vector<BaseCalcObj*> * Origin, int index)const  {
 	if (index != 0) {
 #if DEBUG >= 1
 		cout << "Decimal::CalcObj_num(): index=" << index << endl;
-		delete (*Origin)[0];
+		for (int i = 0; i < Origin->size(); i++) {
+			delete (*Origin)[i];
+		}
 #endif // 0
 		return Decimal(BigNum("0"));
 	}
+
 	delete (*Origin)[0];
 	BigNum In(id);
 	Decimal Result;
@@ -44,6 +51,7 @@ Decimal CalcObj_num::Operate(vector<BaseCalcObj*> * Origin, int index)const  {
 		Result.numerator[In] = 1;
 		Result.denominator[BigNum("1")] = 1;
 	}
+
 
 	return move(Result);
 }

@@ -5,7 +5,7 @@
 
 CalcObj_factorial::CalcObj_factorial()
 {
-
+	priority = FACTORIAL;
 }
 
 
@@ -15,7 +15,9 @@ CalcObj_factorial::~CalcObj_factorial()
 }
 
 
-CalcObj_factorial::CalcObj_factorial(string identity) :BaseCalcObj(identity) {};
+CalcObj_factorial::CalcObj_factorial(string identity) :BaseCalcObj(identity) {
+	priority = FACTORIAL;
+};
 
 Decimal CalcObj_factorial::Operate(vector<BaseCalcObj*> * Obj_list, int index) const {
 	vector<BaseCalcObj*> * lhs;

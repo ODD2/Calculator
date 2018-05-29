@@ -4,16 +4,16 @@
 
 CalcObj_pos::CalcObj_pos()
 {
+	priority = SIGN;
 }
-
 
 CalcObj_pos::~CalcObj_pos()
 {
 }
 
-
-
-CalcObj_pos::CalcObj_pos(string identity) :BaseCalcObj(identity) {};
+CalcObj_pos::CalcObj_pos(string identity) :BaseCalcObj(identity) {
+	priority = SIGN;
+};
 
 Decimal CalcObj_pos::Operate(vector<BaseCalcObj*> * Obj_list, int index) const {
 	vector<BaseCalcObj*> * lhs;

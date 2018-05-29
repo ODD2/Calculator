@@ -1,5 +1,7 @@
-#include "Decimal.h"
 #include <cmath>
+#include "Decimal.h"
+#include "BaseCalcObj.h"
+#include "Interpreter.h"
 
 
 Decimal::Decimal()
@@ -15,26 +17,24 @@ Decimal::~Decimal()
 }
 
 Decimal::Decimal(string str) {
-	BigNum In(str);
+	*this = Decimal(Interpreter::Converter(str));
 
-	if (In.floatPosition) {
-		int swappos = In.floatPosition;
-		numerator[In.FloatPoint_Swap(0)]=1;
-		denominator[BigNum("1").FloatPoint_Swap(swappos*(-1))] = 1;
-	}
-	else {
-		numerator[In] = 1;
-		denominator[BigNum("1")] = 1;
-	}
+	//BigNum In(str);
+
+	//if (In.floatPosition) {
+	//	int swappos = In.floatPosition;
+	//	numerator[In.FloatPoint_Swap(0)]=1;
+	//	denominator[BigNum("1").FloatPoint_Swap(swappos*(-1))] = 1;
+	//}
+	//else {
+	//	numerator[In] = 1;
+	//	denominator[BigNum("1")] = 1;
+	//}
 }
 
-Decimal::Decimal(const vector<BaseCalcObj*>& rhs) {
-	
-
-
-
-
-
+Decimal::Decimal(vector<BaseCalcObj*>* rhs) {
+	int Start_Index = BaseCalcObj::Prior_FindLowest(rhs);
+	*this  = (*rhs)[Start_Index]->Operate(rhs, Start_Index);
 }
 
 Decimal::Decimal(const Decimal& Dec) {
@@ -188,12 +188,12 @@ Decimal operator/(const Decimal& lhs,const Decimal& rhs) {
 
 	map<BigNum , double>::const_iterator rhs_numerator_it = rhs.numerator.begin();
 	for (; rhs_numerator_it != rhs.numerator.end(); rhs_numerator_it++) {
-		Result.denominator[rhs_numerator_it->first] += 1;
+		Result.denominator[rhs_numerator_it->first] += rhs_numerator_it->second;
 	}
 
 	map<BigNum , double>::const_iterator rhs_denominator_it = rhs.denominator.begin();
 	for (; rhs_denominator_it != rhs.denominator.end(); rhs_denominator_it++) {
-		Result.numerator[rhs_denominator_it->first] += 1;
+		Result.numerator[rhs_denominator_it->first] += rhs_denominator_it->second;
 	}
 
 	Result.Simplification();
@@ -203,9 +203,13 @@ Decimal operator/(const Decimal& lhs,const Decimal& rhs) {
 Decimal operator^(const Decimal& lhs, const Decimal& rhs) {
 	double power = rhs.Evaluate();
 
-	if (fmod(power,0.5) != 0 ) {
+	if (power == 0) {
+		return move(Decimal());
+	}
+	else if (fmod(power,0.5) != 0 ) {
 #if DEBUG >= 2
 		cout << "Decimal::operator^,rhs/0.5 != 0 , rhs=" << power << endl;
+		cout << "Decimal::operator^, Returning 1" << endl;;
 #endif
 		return move(Decimal());
 	}
@@ -326,6 +330,44 @@ void Decimal::Simplification() {
 	}
 	else {
 
+		BigNum O("0");
+		map<BigNum, double>::iterator it;
+
+
+		//檢查分子分母有沒有0
+		it = denominator.begin();
+		for (; it != denominator.end(); it++) {
+			if (it->first == O) {
+				cout << "Error! Decimal Denominator has 0, Returning 0." << endl;
+
+				numerator.clear();
+				denominator.clear();
+
+				numerator[O] = 1;
+				denominator[BigNum("1")] = 1;
+				return;
+			}
+		}
+		it = numerator.begin();
+		for (; it != numerator.end(); it++) {
+			if (it->first == O) {
+				cout << "Decimal Numerator Has 0, Returning 0." << endl;
+
+
+				numerator.clear();
+				denominator.clear();
+
+				numerator[O] = 1;
+				denominator[BigNum("1")] = 1;
+
+				return;
+			}
+		}
+
+
+
+
+
 
 		//存放要被刪掉的分子
 		vector< map<BigNum, double>::iterator > erase_numerator;
@@ -333,7 +375,7 @@ void Decimal::Simplification() {
 		vector< map<BigNum, double>::iterator > erase_denominator;
 
 
-		map<BigNum, double>::iterator it = denominator.begin();
+		it = denominator.begin();
 
 		for (; it != denominator.end(); it++) {
 			//分子有

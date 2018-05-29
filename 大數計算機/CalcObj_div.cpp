@@ -4,13 +4,16 @@
 
 CalcObj_div::CalcObj_div()
 {
+	priority = MULTIPLY;
 }
-CalcObj_div::CalcObj_div(string identity) :BaseCalcObj(identity) {};
 
 CalcObj_div::~CalcObj_div()
 {
 }
 
+CalcObj_div::CalcObj_div(string identity) :BaseCalcObj(identity) {
+	priority = MULTIPLY;
+};
 
 Decimal CalcObj_div::Operate(vector<BaseCalcObj*> * Obj_list, int index) const {
 	vector<BaseCalcObj*> * lhs;

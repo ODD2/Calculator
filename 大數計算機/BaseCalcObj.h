@@ -11,10 +11,23 @@ class Decimal;
 class BaseCalcObj
 {
 	friend class Decimal;
+
 public:
+	enum CalcType
+	{
+		ASSIGN = -1,
+		NUM = 0,
+		ADD,
+		SIGN,
+		MULTIPLY,
+		POWER,
+		FACTORIAL
+	};
+
 	BaseCalcObj();
 	BaseCalcObj(string);
-	~BaseCalcObj();
+	virtual ~BaseCalcObj();
+	BaseCalcObj& operator= (BaseCalcObj&);
 
 	void PriorFall();
 	void PriorRise();
@@ -27,10 +40,10 @@ public:
 
 	virtual Decimal Operate(vector<BaseCalcObj*> *, int) const = 0;
 	virtual void Divide(vector<BaseCalcObj*> *, int, vector<BaseCalcObj*> *&, vector<BaseCalcObj*>*&) const;
-	int Prior_FindLowest(const vector<BaseCalcObj*> *) const;
+	static int Prior_FindLowest(const vector<BaseCalcObj*> *) ;
 
 protected:
-	int priority = -1;
-	string identity;
+	int priority = 0;
+	string identity="default";
 };
 

@@ -9,7 +9,7 @@ public:
 	~CalcObj_num();
 
 	virtual bool isOperator() const  final;
-
 	virtual Decimal Operate(vector<BaseCalcObj*> *, int) const;
+
 };
 

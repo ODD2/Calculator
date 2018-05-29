@@ -4,6 +4,7 @@
 
 CalcObj_plus::CalcObj_plus()
 {
+	priority = ADD;
 }
 
 
@@ -12,7 +13,9 @@ CalcObj_plus::~CalcObj_plus()
 }
 
 
-CalcObj_plus::CalcObj_plus(string identity) :BaseCalcObj(identity) {};
+CalcObj_plus::CalcObj_plus(string identity) :BaseCalcObj(identity) {
+	priority = ADD;
+};
 
 Decimal CalcObj_plus::Operate(vector<BaseCalcObj*> * Obj_list, int index) const {
 	vector<BaseCalcObj*> * lhs;

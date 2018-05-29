@@ -44,7 +44,6 @@ Interpreter::Interpreter()
 {
 } 
 
-
 Interpreter::~Interpreter()
 {
 	for (int i = 0; i < obj_list->size(); i++) {
@@ -52,17 +51,10 @@ Interpreter::~Interpreter()
 	}
 }
 
-
-
-
-
-
-
 vector<BaseCalcObj*> Interpreter::Converter_Save(string command) {
 	obj_list =  Interpreter::Converter(command);
 	return *obj_list;
 }
-
 
 
 /* ========== TOOLS ========== */
