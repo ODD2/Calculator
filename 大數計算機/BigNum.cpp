@@ -51,6 +51,7 @@ BigNum::BigNum(double rhs):BigNum(to_string(rhs)) {
 	
 }
 /* ========== Assignments ========== */
+
 BigNum& BigNum::operator=(const  BigNum& rhs) {
 	this->value = rhs.value;
 	this->floatPosition = rhs.floatPosition;
@@ -66,6 +67,28 @@ BigNum& BigNum::operator=(BigNum&& rhs) {
 	this->pureInt = rhs.pureInt;
 	return *this;
 }
+
+void BigNum::operator+=(const  BigNum& rhs) {
+	*this = *this + rhs;
+}
+
+void BigNum::operator-=(const  BigNum& rhs) {
+	*this = *this - rhs;
+}
+
+void BigNum::operator*=(const  BigNum& rhs) {
+	*this = *this * rhs;
+}
+
+void BigNum::operator/=(const  BigNum& rhs) {
+	*this = *this / rhs;
+}
+
+void BigNum::operator%=(const  BigNum& rhs) {
+	*this = *this % rhs;
+}
+
+
 
 
 /* ========== In/Out ========== */
@@ -429,6 +452,7 @@ BigNum operator^(const BigNum& lhs, const BigNum& rhs) {
 #if DEBUG>=5
 		cout << "BigNum::operator^():Power(" << rhs << ") is not a multiplication of 0.5." << endl;
 #endif // DEBUG
+		cout << "Error! Power Must be Multiple of 0.5" << endl;
 		return move(BigNum("0"));
 	}
 	//開負數的平方根
@@ -656,13 +680,13 @@ BigNum::operator long long int() const {
 #if DEBUG >=4
 		cout << "BigNum:operator long long int(), floatPosition!=0" << endl;
 #endif // DEBUG
-		return BigNum("0");
+		return 0;
 	}
 	else if (*this > BigNum("9223372036854775808")) {
 #if DEBUG >= 4 
 		cout << "BigNum:operator long long int(), *this >  9223372036854775808" << endl;
 #endif // DEBUG
-		return BigNum("0");
+		return 0;
 	}
 
 	long long int scaler = 1;
@@ -684,13 +708,13 @@ BigNum::operator  int() const {
 #if DEBUG >= 4
 		cout << "BigNum:operator long long int(), floatPosition!=0" << endl;
 #endif // DEBUG
-		return BigNum("0");
+		return 0;
 	}
 	else if (*this > BigNum("2147483648")) {
 #if DEBUG >= 4
 		cout << "BigNum:operator long long int(), *this >  2147483648" << endl;
 #endif // DEBUG
-		return BigNum("0");
+		return 0;
 	}
 
 	
@@ -768,8 +792,6 @@ void BigNum::Refine() {
 		value.erase(value.end() - 1);
 	}
 }
-
-
 
 void BigNum::Vec_Multiply(const vector<int>& source_1,const vector<int>& source_2) {
 	value.clear();

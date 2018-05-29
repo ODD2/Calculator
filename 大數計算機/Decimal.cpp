@@ -48,15 +48,15 @@ Decimal::Decimal(Decimal&& Dec)  {
 }
 
 Decimal::Decimal(const BigNum& rhs) {
-
+	BigNum ONE("1");
 	if (rhs.floatPosition) {
 		int swappos = rhs.floatPosition;
-		numerator[rhs.FloatPoint_Swap(0)] = 1;
-		denominator[BigNum("1").FloatPoint_Swap(swappos*(-1))] = 1;
+		numerator[rhs.FloatPoint_Swap(0)] = ONE;
+		denominator[ONE.FloatPoint_Swap(swappos*(-1))] = ONE;
 	}
 	else {
-		numerator[rhs] = 1;
-		denominator[BigNum("1")] = 1;
+		numerator[rhs] = ONE;
+		denominator[ONE] = ONE;
 	}
 
 }
@@ -77,7 +77,7 @@ Decimal operator+(const Decimal& lhs, const Decimal& rhs) {
 	Decimal cpLhs = lhs;
 	Decimal cpRhs = rhs;
 
-	map<BigNum , double>::const_iterator it;
+	map<BigNum , BigNum>::const_iterator it;
 
 	for (it = rhs.denominator.begin(); it != rhs.denominator.end(); it++) {
 		cpLhs.numerator[it->first] += it->second;
@@ -100,13 +100,12 @@ Decimal operator+(const Decimal& lhs, const Decimal& rhs) {
 
 
 	for (it = cpLhs.numerator.begin(); it != cpLhs.numerator.end(); it++) {
-		for (int i = 0; i<it->second; i++)
-			L_NUMERATOR = L_NUMERATOR * it->first;
+			L_NUMERATOR = L_NUMERATOR * (it->first ^ it->second);
 	}
 
 	for (it = cpRhs.numerator.begin(); it != cpRhs.numerator.end(); it++) {
-		for(int i=0;i<it->second;i++)
-			R_NUMERATOR = R_NUMERATOR * it->first;
+		
+			R_NUMERATOR = R_NUMERATOR * (it->first ^ it->second);
 	}
 
 	Result.numerator[L_NUMERATOR + R_NUMERATOR] = 1;
@@ -124,7 +123,7 @@ Decimal operator-(const Decimal& lhs, const Decimal& rhs) {
 	Decimal cpLhs = lhs;
 	Decimal cpRhs = rhs;
 
-	map<BigNum , double>::const_iterator it;
+	map<BigNum , BigNum>::const_iterator it;
 
 	for (it = rhs.denominator.begin(); it != rhs.denominator.end(); it++) {
 		cpLhs.numerator[it->first] += it->second;
@@ -147,13 +146,11 @@ Decimal operator-(const Decimal& lhs, const Decimal& rhs) {
 
 
 	for (it = cpLhs.numerator.begin(); it != cpLhs.numerator.end(); it++) {
-		for (int i = 0; i<it->second; i++)
-			L_NUMERATOR = L_NUMERATOR * it->first;
+		L_NUMERATOR = L_NUMERATOR * (it->first ^ it->second);
 	}
 
 	for (it = cpRhs.numerator.begin(); it != cpRhs.numerator.end(); it++) {
-		for (int i = 0; i<it->second; i++)
-			R_NUMERATOR = R_NUMERATOR * it->first;
+		R_NUMERATOR = R_NUMERATOR * (it->first ^ it->second);
 	}
 
 	Result.numerator[L_NUMERATOR - R_NUMERATOR] = 1;
@@ -169,12 +166,12 @@ Decimal operator-(const Decimal& lhs, const Decimal& rhs) {
 Decimal operator*(const Decimal& lhs, const Decimal& rhs) {
 	Decimal Result = lhs;
 
-	map<BigNum , double>::const_iterator rhs_numerator_it = rhs.numerator.begin();
+	map<BigNum , BigNum>::const_iterator rhs_numerator_it = rhs.numerator.begin();
 	for (; rhs_numerator_it != rhs.numerator.end(); rhs_numerator_it++) {
 		Result.numerator[rhs_numerator_it->first] += rhs_numerator_it->second;
 	}
 
-	map<BigNum , double>::const_iterator rhs_denominator_it = rhs.denominator.begin();
+	map<BigNum , BigNum>::const_iterator rhs_denominator_it = rhs.denominator.begin();
 	for (; rhs_denominator_it != rhs.denominator.end(); rhs_denominator_it++) {
 		Result.denominator[rhs_denominator_it->first] += rhs_denominator_it->second;
 	}
@@ -186,12 +183,12 @@ Decimal operator*(const Decimal& lhs, const Decimal& rhs) {
 Decimal operator/(const Decimal& lhs,const Decimal& rhs) {
 	Decimal Result = lhs;
 
-	map<BigNum , double>::const_iterator rhs_numerator_it = rhs.numerator.begin();
+	map<BigNum , BigNum>::const_iterator rhs_numerator_it = rhs.numerator.begin();
 	for (; rhs_numerator_it != rhs.numerator.end(); rhs_numerator_it++) {
 		Result.denominator[rhs_numerator_it->first] += rhs_numerator_it->second;
 	}
 
-	map<BigNum , double>::const_iterator rhs_denominator_it = rhs.denominator.begin();
+	map<BigNum , BigNum>::const_iterator rhs_denominator_it = rhs.denominator.begin();
 	for (; rhs_denominator_it != rhs.denominator.end(); rhs_denominator_it++) {
 		Result.numerator[rhs_denominator_it->first] += rhs_denominator_it->second;
 	}
@@ -201,40 +198,35 @@ Decimal operator/(const Decimal& lhs,const Decimal& rhs) {
 }
 
 Decimal operator^(const Decimal& lhs, const Decimal& rhs) {
-	double power = rhs.Evaluate();
-
-	if (power == 0) {
+	BigNum power = rhs.Evaluate();
+	BigNum O("0");
+	BigNum O_5("0.5");
+	if (power.Sign_Pos() == O) {
 		return move(Decimal());
 	}
-	else if (fmod(power,0.5) != 0 ) {
+	else if ( power.Sign_Pos() % O_5 != O ) {
 #if DEBUG >= 2
 		cout << "Decimal::operator^,rhs/0.5 != 0 , rhs=" << power << endl;
 		cout << "Decimal::operator^, Returning 1" << endl;;
 #endif
+		cout << "Error! Power Must be Multiple of 0.5" << endl;
 		return move(Decimal());
 	}
 	else {
 		Decimal Result = lhs;
-		if (power < 0) {
-		}
-		else if (power == 0) {
-			return move(Decimal());
-		}
-		else {
-		}
-
-		map<BigNum, double>::iterator Result_it = Result.numerator.begin();
+		
+		map<BigNum , BigNum>::iterator Result_it = Result.numerator.begin();
 		//power to numerators;
 		for (; Result_it != Result.numerator.end(); Result_it++)
 		{
-			(Result_it->second) *= power;
+			Result_it->second = Result_it->second * power;
 		}
 
 		Result_it = Result.denominator.begin();
 		//power to denominators;
 		for (; Result_it != Result.denominator.end(); Result_it++)
 		{
-			(Result_it->second) *= power;
+			Result_it->second = Result_it->second * power;
 		}
 		Result.Simplification();
 		return move(Result);
@@ -248,7 +240,7 @@ Decimal operator!(const Decimal &lhs) {
 
 Decimal operator-(const Decimal & rhs) {
 	Decimal Result(rhs);
-	Result.numerator[BigNum("-1")]+=1;
+	Result.numerator[BigNum("-1")] += 1;
 	return move(Result);
 }
 
@@ -286,7 +278,7 @@ BigNum Decimal::Evaluate() const {
 	BigNum Result("1");
 	BigNum ONE("1");
 
-	map<BigNum , double>::const_iterator it = numerator.begin();
+	map<BigNum , BigNum>::const_iterator it = numerator.begin();
 	for (; it != numerator.end(); it++) {
 			Result = Result * (it->first ^ it->second);
 	}
@@ -303,7 +295,7 @@ BigNum Decimal::Evaluate() const {
 
 void Decimal::Combination(ostream& os=cout) const {
 
-	map<BigNum , double>::const_iterator it = numerator.begin();
+	map<BigNum , BigNum>::const_iterator it = numerator.begin();
 	for (; it != numerator.end();) {
 		os << "(" << it->first << "^" << it->second << ")";
 		if (++it != numerator.end())os << "*";
@@ -331,7 +323,8 @@ void Decimal::Simplification() {
 	else {
 
 		BigNum O("0");
-		map<BigNum, double>::iterator it;
+		BigNum ONE("1");
+		map<BigNum , BigNum>::iterator it;
 
 
 		//檢查分子分母有沒有0
@@ -370,9 +363,9 @@ void Decimal::Simplification() {
 
 
 		//存放要被刪掉的分子
-		vector< map<BigNum, double>::iterator > erase_numerator;
+		vector< map<BigNum , BigNum>::iterator > erase_numerator;
 		//存放要被刪掉的分母
-		vector< map<BigNum, double>::iterator > erase_denominator;
+		vector< map<BigNum , BigNum>::iterator > erase_denominator;
 
 
 		it = denominator.begin();
@@ -416,22 +409,21 @@ void Decimal::Simplification() {
 		//最簡分數
 #if SIMPLIFY_EXTREME
 
-		BigNum ONE("1");
 		while (1) {
 
-			for (map<BigNum, double>::iterator numerator_it = numerator.begin();
+			for (map<BigNum , BigNum>::iterator numerator_it = numerator.begin();
 				numerator_it != numerator.end();
 				numerator_it++)
 			{
-				if (fmod(numerator_it->second, 1) != 0)continue;
+				if ((numerator_it->second.Sign_Pos() % ONE) != O )continue;
 
 
 
-				for (map<BigNum, double>::iterator denominator_it = denominator.begin();
+				for (map<BigNum , BigNum>::iterator denominator_it = denominator.begin();
 					denominator_it != denominator.end();
 					denominator_it++)
 				{
-					if (fmod(denominator_it->second, 1) != 0)continue;
+					if ((numerator_it->second.Sign_Pos() % ONE) != O)continue;
 
 
 
@@ -442,7 +434,8 @@ void Decimal::Simplification() {
 						if (print_origin)
 							cout << "Decimal::Simplification(): "; Combination(cout); cout << endl;
 #endif // DEBUG >=5
-						int num_simplify = denominator_it->second < numerator_it->second ?
+						BigNum
+							num_simplify = denominator_it->second < numerator_it->second ?
 							denominator_it->second : numerator_it->second;
 
 
@@ -454,8 +447,8 @@ void Decimal::Simplification() {
 						denominator_it->second -= num_simplify;
 						numerator_it->second -= num_simplify;
 
-						if (denominator_it->second == 0) { denominator.erase(denominator_it); }
-						if (numerator_it->second == 0) { numerator.erase(numerator_it); };
+						if (denominator_it->second == O) { denominator.erase(denominator_it); }
+						if (numerator_it->second == O) { numerator.erase(numerator_it); };
 
 
 #if DEBUG >=2

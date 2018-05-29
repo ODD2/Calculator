@@ -23,17 +23,16 @@ public:
 	BigNum& operator=(const  BigNum&);
 	BigNum& operator=(BigNum&&);
 
+	void operator+=(const  BigNum& rhs);
+	void operator-=(const  BigNum& rhs);
+	void operator*=(const  BigNum& rhs);
+	void operator/=(const  BigNum& rhs);
+	void operator%=(const  BigNum& rhs);
+
 
 	friend istream& operator >> (istream& lhs,BigNum& rhs);
 	friend ostream& operator << (ostream& lhs, const BigNum& rhs);
 
-
-	void operator+=(const BigNum& rhs) {
-		*this = *this + rhs;
-	}
-	void operator-=(const BigNum& rhs){
-		*this = *this - rhs;
-	}
 
 	friend BigNum operator+(const BigNum&, const BigNum&);
 	friend BigNum operator-(const BigNum&, const BigNum&);

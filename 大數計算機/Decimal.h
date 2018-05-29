@@ -42,8 +42,9 @@ public:
 	void Combination(ostream&) const;
 
 protected:
-	map<BigNum , double> numerator;
-	map<BigNum , double> denominator;
+	map<BigNum , BigNum> numerator;
+	map<BigNum , BigNum> denominator;
+
 	void Init(const BigNum& In) {
 		Clear();
 		numerator[In] = 1;
