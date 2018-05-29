@@ -33,7 +33,8 @@ Decimal CalcObj_variable::Operate(vector<BaseCalcObj*> * Origin, int index)const
 #endif // 0
 		return Decimal(BigNum("0"));
 	}
+	
 	delete (*Origin)[0];
 	
-	return Interpreter::GLOBAL_VAR_MAP[id];
+	return Interpreter::getGVM(id);
 }

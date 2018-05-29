@@ -464,32 +464,104 @@ BigNum operator^(const BigNum& lhs, const BigNum& rhs) {
 	}
 
 	BigNum Two("2");
-	BigNum Result("1");
+	BigNum Result("1"); 
 
 	//需要根號
 	if (_0_5_times % Two != Zero)
 	{
-		/*-----------牛頓求值法-----------*/
+		
+		vector<int> cpLhs = lhs.value;
+		int lhsFloatPos = lhs.floatPosition;
 
-		BigNum Value = lhs.Sign_Pos();//n
+		BigNum Remainder; Remainder.value.clear();
+		BigNum Runner; Runner.value.clear();
+		Result.value.clear();
 
-		BigNum Root = lhs.Sign_Pos();//x
 
-		while (1)
-		{
-			/*
-			f(x) = x^2 - n
-			f'(x) = 2*x
-			Xn =  x^2 - f(x)/f'(x)  =>  (x^2 + n)/2*n
-			*/
-			BigNum NewtonMethod = move(((Root*Root) + Value) / (BigNum("2")*Root));
-			if (Root.FloatPoint_Cut(FLOAT_EFFECTIVE_RANGE) == NewtonMethod.FloatPoint_Cut(FLOAT_EFFECTIVE_RANGE))
-			{
+		while (1) {
+			int size = cpLhs.size();
+
+			//條件偵測
+			if (size == lhs.value.size() && size % 2) {
+				Remainder.value.insert(Remainder.value.begin(), cpLhs.back());
+				cpLhs.pop_back();
+			}
+			else if (size == 0) {
+				Remainder.value.insert(Remainder.value.begin(), 0);
+				Remainder.value.insert(Remainder.value.begin(), 0);
+			}
+			else if (size == 1) {
+				Remainder.value.insert(Remainder.value.begin(), cpLhs.back());
+				cpLhs.pop_back();
+			}
+			else {
+				Remainder.value.insert(Remainder.value.begin(), cpLhs.back());
+				cpLhs.pop_back();
+				Remainder.value.insert(Remainder.value.begin(), cpLhs.back());
+				cpLhs.pop_back();
+			}
+
+
+			Runner.value.insert(Runner.value.begin(), 0);
+			for (int i = 9; i >= 0; i--) {
+				//嘗試數值有沒有超過
+				Runner.value[0] = i;
+
+				BigNum Tester(i);
+				BigNum Product = Runner * Tester;
+				
+				if (Product <= Remainder) {
+					//符合條件
+					Result.value.insert(Result.value.begin(), i);
+
+					//小數點條件
+					if (size <= lhsFloatPos) {
+						Result.floatPosition += 1;
+					}
+
+
+					Remainder -= Product;
+					Runner += Tester;
+
+					if (Remainder == Zero) {
+						Remainder.value.pop_back();
+					}
+
+					break;
+				}
+			}
+
+			if (Result.floatPosition == FLOAT_EFFECTIVE_RANGE +1) {
+				Result.floatPosition -= 1;
 				break;
 			}
-			Root = NewtonMethod;
 		}
-		Result = Result *  Root;
+
+
+
+
+		///*-----------牛頓求值法-----------*/
+
+		//BigNum Value = lhs.Sign_Pos();//n
+
+		//BigNum Root = lhs.Sign_Pos();//x
+
+		//while (1)
+		//{
+		//	/*
+		//	f(x) = x^2 - n
+		//	f'(x) = 2*x
+		//	Xn =  x^2 - f(x)/f'(x)  =>  (x^2 + n)/2*n
+		//	*/
+		//	BigNum NewtonMethod = move(((Root*Root) + Value) / (BigNum("2")*Root));
+		//	if (Root.FloatPoint_Cut(FLOAT_EFFECTIVE_RANGE) == NewtonMethod.FloatPoint_Cut(FLOAT_EFFECTIVE_RANGE))
+		//	{
+		//		break;
+		//	}
+		//	Root = NewtonMethod;
+		//}
+		//Result = Result *  Root;
+
 	}	
 	//整數次方
 	for (; _0_5_times >= Two ; ) {

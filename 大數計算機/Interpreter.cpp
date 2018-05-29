@@ -1,12 +1,12 @@
 #include "Interpreter.h"
-
+//#define Show
 map<string, Decimal> Interpreter::GLOBAL_VAR_MAP;
 
 vector<BaseCalcObj*>* Interpreter::Converter(string command) {
 	vector<BaseCalcObj*> * out = new vector<BaseCalcObj*>;
-	string variableNmae = "";//≈‹º∆¶W∫Ÿ(≥Q¨£≠» or ≥–≥y)
+	string variableName = "";//≈‹º∆¶W∫Ÿ(≥Q¨£≠» or ≥–≥y)
 	string expression = "";//πB∫‚¶°
-	int mode = checkMode(command, variableNmae, expression);//0¨∞•ø±`πB∫‚ 1¨∞dec  2¨∞int 3¨£≠»
+	int mode = checkMode(command, variableName, expression);//0¨∞•ø±`πB∫‚ 1¨∞dec  2¨∞int 3¨£≠»
 	bool pass = checkright(expression);//ΩTª{∫‚¶°•øΩT
 	if (!pass) {
 		cout << "Error\n";
@@ -19,16 +19,43 @@ vector<BaseCalcObj*>* Interpreter::Converter(string command) {
 	switch (mode)
 	{
 	case 0://§@ØÎπB∫‚
+#ifdef Show
 		cout << "πB∫‚" << expression << "___\n";
+#endif 
 		break;
 	case 1://Set Decimal
-		cout << "Create Decimal " << variableNmae << " = " << expression << "___\n";
-		break;
+
 	case 2://Set Interger
-		cout << "Create Interger " << variableNmae << " = " << expression << "___\n";
-		break;
+	
 	case 3://¨£≠»
-		cout << variableNmae << " be set to " << expression << "___\n";
+#ifdef Show		
+		cout << variableName << " be set to " << expression << "___\n";
+#endif		
+		//•[§J≈‹º∆ ©M ' = '
+		
+		if (mode == 2)
+		{
+			GLOBAL_VAR_MAP[variableName] = Decimal();
+#ifdef Show
+			cout << "Create Decimal " << variableName << " = " << expression << "___\n";
+
+#endif
+			GLOBAL_VAR_MAP[variableName].setPureInt(true);
+		}
+		else if (mode == 1) {
+			GLOBAL_VAR_MAP[variableName] = Decimal();
+#ifdef Show
+			cout << "Create Interger " << variableName << " = " << expression << "___\n";
+#endif	
+			GLOBAL_VAR_MAP[variableName].setPureInt(false);
+		}
+
+		{BaseCalcObj*x = new CalcObj_variable(variableName);
+		x->setPrior(0);
+		out->push_back(x);
+		BaseCalcObj*y = new CalcObj_assign("=");
+		y->setPrior(-1);
+		out->push_back(y); }
 		break;
 	default:
 		return new vector<BaseCalcObj*>;
@@ -36,8 +63,15 @@ vector<BaseCalcObj*>* Interpreter::Converter(string command) {
 	}
 	//±Nº∆¶r¬‡¨∞object
 	toUnit(expression, out);
-
 	return out;
+}
+
+Decimal& Interpreter::getGVM(string id) {
+	if (!GLOBAL_VAR_MAP.count(id)) {
+		cout << "Error! Variable " << id << " Has Not Been Set." << endl;
+		return GLOBAL_VAR_MAP["default"];
+	}
+	return GLOBAL_VAR_MAP[id];
 }
 
 Interpreter::Interpreter()
@@ -79,20 +113,28 @@ int Interpreter::checkMode(string in, string &var, string &expression) {//0¨∞•ø±
 		expression.assign(in.begin() + variablePlace + 1, in.end());
 		if (atDec == 0) {
 			mode = 1;
+#ifdef Show
 			cout << "Mode :" << mode << " = Set dec\n";
+#endif		
 		}
 		else if (atInt == 0) {
 			mode = 2;
+#ifdef Show			
 			cout << "Mode :" << mode << " = Set int\n";
+#endif		
 		}
 		else if (mode == 0) {
 			mode = 3;
+#ifdef Show			
 			cout << "Mode :" << mode << " = Give num\n";
+#endif
 		}
 	}
 	else {
 		expression.assign(in.begin(), in.end());
+#ifdef Show
 		cout << "Normal calculous\n";
+#endif	
 	}
 	return mode;
 }
@@ -100,40 +142,37 @@ int Interpreter::checkMode(string in, string &var, string &expression) {//0¨∞•ø±
 //Check
 bool Interpreter::checkright(string in) {
 
-
-	return true;
 	/*if (in == "")return false;
 	//ΩTª{´D™k¶r§∏
 	for (auto i:in) {
-	if (!(isnum(i) || ischar(i) || checkoperator(i) || i==' ' || i=='.'||i=='=')) {
-	return false;
-	}
+		if (!(isnum(i) || ischar(i) || checkoperator(i) || i==' ' || i=='.'||i=='=')) {
+			return false;
+		}
 	}
 	//ΩTª{≈‹º∆¨€æF
 	int variablecount = 0;
 	for (int i = 0; i < in.length();i++) {
-	bool findVariable=false;
+		bool findVariable=false;
 
-	while (ischar(in[i]) )
-	{
-
-	if (!findVariable) {
-	if ( i != 0 && (  (in[i - 1] == ')') || (in[i - 1] == '!')  || (in[i - 1] == '.') || (in[i - 1] == '!')   )) return false;//ex:  (1+1)apple
-	findVariable = true;
-	}
-	i++;//ß‰®Ï≈‹º∆´·§@¶Ï
+		while (ischar(in[i]) )
+		{
+			if (!findVariable) {
+				if ( i != 0 && (  (in[i - 1] == ')') || (in[i - 1] == '!')  || (in[i - 1] == '.') || (in[i - 1] == '!')   )) return false;//ex:  (1+1)apple
+					findVariable = true;
+			}
+			i++;//ß‰®Ï≈‹º∆´·§@¶Ï
 	}
 	if (findVariable) {
-	while(in[i]==' ') {
-	i++;
-	}
+		while(in[i]==' ') {
+			i++;
+		}
 	if ( ischar(in[i]) || isnum(in[i]) || in[i]=='('  )return false;//≈‹º∆´·±µ "≈‹º∆" "º∆¶r" '(' ≥£§£¶Ê
 	}
 	}
 	//πB∫‚§l§£Ø‡¨€æF(•ø≠t∏π´e•iπJ®ÏπB∫‚§l)
 	for (int i = 0; i < in.length(); i++) {
-	}
-	return true;*/
+	}*/
+	return true;
 }
 
 bool Interpreter::checkoperator(char c) {
@@ -196,8 +235,7 @@ void Interpreter::changeSign(string &in) {
 			}
 			else if (in[i + 1] == '(') {//•k√‰¶≥'(' ∫˚´˘≠ÏºÀ
 
-			}
-			else if ((is_operator(in[i - 1]) && is_operator(in[i + 1]))) {//•™•k®‚√‰≥£¨Ooperator ¬k√˛¨∞•ø≠t∏π
+			}else if ((is_operator(in[i - 1]) && is_operator(in[i + 1]))) {//•™•k®‚√‰≥£¨Ooperator ¬k√˛¨∞•ø≠t∏π
 				if (in[i] == '-')in[i] = '_';
 				else in[i] = '#';
 			}
@@ -279,7 +317,10 @@ void Interpreter::toUnit(string in, vector<BaseCalcObj*>* out) {
 				i++;
 			}
 			i--;
-#if DEBUG >=2
+			BaseCalcObj*x = new CalcObj_variable(varbuff);
+			x->setPrior(0);
+			out->push_back(x);
+#ifdef Show
 			cout << "got Var : " << varbuff << " pri=0" << getPriority(varbuff[0], basepri) << "\n";
 #endif
 		}
@@ -293,8 +334,9 @@ void Interpreter::toUnit(string in, vector<BaseCalcObj*>* out) {
 			BaseCalcObj*x = new CalcObj_num(numbuff);
 			x->setPrior(0);
 			out->push_back(x);
+#ifdef Show
 			cout << "got Num : " << numbuff << " pri=0" << "\n";
-
+#endif
 		}
 		else if (is_operator(in[i])) {
 
@@ -312,49 +354,63 @@ void Interpreter::toUnit(string in, vector<BaseCalcObj*>* out) {
 				BaseCalcObj* x = new  CalcObj_factorial("!");
 				x->setPrior(pri);
 				out->push_back(x);
+#ifdef Show
 				cout << "got sign " << sign << " pri=" << pri << "\n";
+#endif			
 			}
 			else if (sign == '^')
 			{
 				BaseCalcObj* x = new CalcObj_power("^");
 				x->setPrior(pri + powerNum);
 				out->push_back(x);
+#ifdef Show		
 				cout << "got sign " << sign << " pri=" << pri + powerNum << "\n";
+#endif			
 			}
 			else if (sign == '+')
 			{
 				BaseCalcObj* x = new CalcObj_plus("+");
 				x->setPrior(pri);
 				out->push_back(x);
+#ifdef Show		
 				cout << "got sign " << sign << " pri=" << pri << "\n";
+#endif			
 			}
 			else if (sign == '-')
 			{
 				BaseCalcObj* x = new CalcObj_minus("-");
 				x->setPrior(pri);
 				out->push_back(x);
+#ifdef Show		
 				cout << "got sign " << sign << " pri=" << pri << "\n";
+#endif			
 			}
 			else if (sign == '*')
 			{
 				BaseCalcObj* x = new CalcObj_multi("*");
 				x->setPrior(pri);
 				out->push_back(x);
+#ifdef Show				
 				cout << "got sign " << sign << " pri=" << pri << "\n";
+#endif
 			}
 			else if (sign == '/')
 			{
 				BaseCalcObj* x = new CalcObj_div("/");
 				x->setPrior(pri);
 				out->push_back(x);
+#ifdef Show		
 				cout << "got sign " << sign << " pri=" << pri << "\n";
+#endif			
 			}
 			else if (sign == '_')
 			{
 				BaseCalcObj* x = new CalcObj_neg("_");
 				x->setPrior(pri);
 				out->push_back(x);
+#ifdef Show		
 				cout << "got sign " << sign << " pri=" << pri << "\n";
+#endif			
 			}
 			previousElement = sign;
 		}

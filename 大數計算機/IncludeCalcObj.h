@@ -12,3 +12,6 @@
 #include "CalcObj_factorial.h"
 
 #include "CalcObj_num.h"
+
+#include "CalcObj_assign.h"
+#include "CalcObj_variable.h"

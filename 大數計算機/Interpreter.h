@@ -10,6 +10,8 @@ public:
 	static map<string, Decimal> GLOBAL_VAR_MAP;
 	static  vector<BaseCalcObj*>* Converter(string);
 
+	static Decimal& getGVM(string);
+
 	Interpreter();
 	~Interpreter();
 

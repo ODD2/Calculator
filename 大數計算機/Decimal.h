@@ -41,8 +41,8 @@ public:
 
 	BigNum Evaluate() const;
 	void Combination(ostream&) const;
-	bool isPureInt() { return pureInt; };
-
+	bool isPureInt() const { return pureInt; }
+	void setPureInt(bool is) {	pureInt = is;}
 protected:
 	map<BigNum , BigNum> numerator;
 	map<BigNum , BigNum> denominator;
@@ -52,6 +52,7 @@ protected:
 		Clear();
 		numerator[In] = 1;
 		denominator[BigNum("1")] = 1;
+		pureInt = In.pureInt;
 	}
 
 	void Clear() {

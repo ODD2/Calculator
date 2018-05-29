@@ -188,29 +188,29 @@ Decimal operator*(const Decimal& lhs, const Decimal& rhs) {
 
 Decimal operator/(const Decimal& lhs,const Decimal& rhs) {
 
-
 	if (lhs.pureInt && rhs.pureInt) 
 	{
 		cout << "Warning: Calculating Division of 2 Pure Integers." << endl;
-		return Decimal(BigNum(0));
+		return Decimal((lhs.Evaluate()/rhs.Evaluate()).PureInt());
 	}
+	else {
 
+		Decimal Result = lhs;
 
-	Decimal Result = lhs;
+		map<BigNum, BigNum>::const_iterator rhs_numerator_it = rhs.numerator.begin();
+		for (; rhs_numerator_it != rhs.numerator.end(); rhs_numerator_it++) {
+			Result.denominator[rhs_numerator_it->first] += rhs_numerator_it->second;
+		}
 
-	map<BigNum , BigNum>::const_iterator rhs_numerator_it = rhs.numerator.begin();
-	for (; rhs_numerator_it != rhs.numerator.end(); rhs_numerator_it++) {
-		Result.denominator[rhs_numerator_it->first] += rhs_numerator_it->second;
+		map<BigNum, BigNum>::const_iterator rhs_denominator_it = rhs.denominator.begin();
+		for (; rhs_denominator_it != rhs.denominator.end(); rhs_denominator_it++) {
+			Result.numerator[rhs_denominator_it->first] += rhs_denominator_it->second;
+		}
+
+		Result.Simplification();
+		Result.pureInt = false;
+		return  move(Result);
 	}
-
-	map<BigNum , BigNum>::const_iterator rhs_denominator_it = rhs.denominator.begin();
-	for (; rhs_denominator_it != rhs.denominator.end(); rhs_denominator_it++) {
-		Result.numerator[rhs_denominator_it->first] += rhs_denominator_it->second;
-	}
-
-	Result.Simplification();
-	Result.pureInt = false;
-	return  move(Result);
 }
 
 Decimal operator^(const Decimal& lhs, const Decimal& rhs) {
@@ -261,7 +261,7 @@ Decimal operator^(const Decimal& lhs, const Decimal& rhs) {
 }
 
 Decimal operator!(const Decimal &lhs) {
-	return move(Decimal((!lhs.Evaluate())));
+	return move(Decimal((!lhs.Evaluate()).PureInt()));
 }
 
 Decimal operator-(const Decimal & rhs) {
@@ -282,7 +282,19 @@ ostream& operator << (ostream& os, const Decimal& rhs) {
 	rhs.Combination(os);
 	os << ",Evaluate:";
 #endif // 
-	os <<  rhs.Evaluate();
+	BigNum Result = rhs.Evaluate();
+	os <<  Result;
+
+	if (!rhs.isPureInt()) {
+		int cover = FLOAT_EFFECTIVE_RANGE - Result.getFloatPosition();
+		if (cover == FLOAT_EFFECTIVE_RANGE) {
+			cout << ".";
+		}
+		for (int i = 0; i < cover; i++) {
+			os << "0";
+		}
+	}
+	
 
 	return os;
 }

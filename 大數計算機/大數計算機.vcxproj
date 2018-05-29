@@ -124,6 +124,7 @@
     <ClCompile Include="CalcObj_power.cpp" />
     <ClCompile Include="CalcObj_variable.cpp" />
     <ClCompile Include="Decimal.cpp" />
+    <ClCompile Include="Integer.cpp" />
     <ClCompile Include="Interpreter.cpp" />
     <ClCompile Include="Source.cpp" />
   </ItemGroup>
@@ -144,6 +145,7 @@
     <ClInclude Include="Decimal.h" />
     <ClInclude Include="GLOBALSETTING.h" />
     <ClInclude Include="IncludeCalcObj.h" />
+    <ClInclude Include="Integer.h" />
     <ClInclude Include="Interpreter.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
