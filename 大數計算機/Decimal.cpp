@@ -290,7 +290,7 @@ ostream& operator << (ostream& os, const Decimal& rhs) {
 	rhs.Combination(os);
 	os << ",Evaluate:";
 #endif // 
-	BigNum Result = rhs.Evaluate();
+	BigNum Result = rhs.Evaluate().AllCheck();
 	os <<  Result;
 
 	if (!rhs.isPureInt()) {

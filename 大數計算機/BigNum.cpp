@@ -1,5 +1,5 @@
 #include "BigNum.h"
-
+#include <ctype.h>
 
 
 BigNum::BigNum()
@@ -20,12 +20,19 @@ BigNum::BigNum(string value){
 	}
 	//get value
 	for (int i = 0; i < value.size(); i++) {
-		if (value[i] == '.') {
+		if (isdigit(value[i]))	this->value.insert(this->value.begin(), value[i] - '0');
+		else if (value[i] == '.'&&pureInt) {
 			pureInt = false;
 			floatPosition = value.size() - 1 - i;
 			continue;
 		}
-		this->value.insert(this->value.begin(), value[i] - '0');
+		else {
+			cout << "Error! BigNum Set to 0" << endl;
+			floatPosition = 0;
+			value.clear();
+			value.push_back(0);
+			return;
+		}
 	}
 
 	Num_CheckFraction();
@@ -123,30 +130,20 @@ istream& operator >> (istream& is, BigNum& rhs) {
 }
 
 ostream& operator << (ostream& os, const BigNum& rhs) {
-	BigNum OUT(rhs.FloatPoint_Cut(FLOAT_EFFECTIVE_RANGE));
-	OUT.Num_CheckClose();
-	OUT.Num_CheckRedundant();
 
-	if (!(OUT.sign))cout << '-';
+	if (!(rhs.sign))cout << '-';
 
 	int end = 0;
 
-	if (OUT.floatPosition > FLOAT_EFFECTIVE_RANGE) {
-		end = OUT.floatPosition - FLOAT_EFFECTIVE_RANGE;
+	if (rhs.floatPosition > FLOAT_EFFECTIVE_RANGE) {
+		end = rhs.floatPosition - FLOAT_EFFECTIVE_RANGE;
 	}
 
-	for (int i = OUT.value.size() - 1; i >= end; i--) {
-		os << OUT.value[i];
-		if (OUT.floatPosition == i && OUT.floatPosition)cout << '.';
+	for (int i = rhs.value.size() - 1; i >= end; i--) {
+		os << rhs.value[i];
+		if (rhs.floatPosition == i && rhs.floatPosition)cout << '.';
 	}
 	
-#ifdef FUCKING_IDIOT_PROGRAMMING
-	if (OUT.floatPosition < FLOAT_EFFECTIVE_RANGE) {
-		for (int i = OUT.floatPosition; i < FLOAT_EFFECTIVE_RANGE; i++) {
-			cout << "0";
-		}
-	}
-#endif
 
 	return os;
 }
@@ -1095,6 +1092,14 @@ BigNum BigNum::GCD(const BigNum& rhs) const{
 	else {
 		return move(cp_RHS);
 	}
+}
+
+BigNum BigNum::AllCheck() const {
+	BigNum Result = *this;
+	Result.Num_CheckClose();
+	Result.Num_CheckFraction();
+	Result.Num_CheckRedundant();
+	return move(Result);
 }
 
 BigNum BigNum::PureInt() const {

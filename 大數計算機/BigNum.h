@@ -75,6 +75,8 @@ public:
 	BigNum PureInt() const;
 	BigNum xPureInt() const;
 
+	BigNum AllCheck() const;
+
 protected:
 	vector<int> value;
 	int floatPosition = 0;
