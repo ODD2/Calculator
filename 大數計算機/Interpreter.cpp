@@ -177,7 +177,7 @@ int Interpreter::checkMode(string in, string &var, string &expression) {//0¬°¥¿±
 					return 4;
 				}
 			}
-			if (varCp[varInt + 7] != ' ') {
+			if (varCp[varDec + 7] != ' ') {
 				return 4;
 			}
 			for (int i = varDec + 8; i < varCp.length(); i++) {
