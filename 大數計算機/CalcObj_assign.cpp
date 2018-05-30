@@ -50,7 +50,8 @@ Decimal CalcObj_assign::Operate(vector<BaseCalcObj*> * Obj_list, int index) cons
 		Interpreter::GLOBAL_VAR_MAP[id] = value.Evaluate().PureInt();
 	}
 	else {
-		Interpreter::GLOBAL_VAR_MAP[id] = value.Evaluate().xPureInt();
+		value.setPureInt(false);
+		Interpreter::GLOBAL_VAR_MAP[id] = move(value);
 	}
 
 	//回傳變數
