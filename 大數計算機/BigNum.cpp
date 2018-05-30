@@ -482,16 +482,16 @@ BigNum operator^(const BigNum& lhs, const BigNum& rhs) {
 			int size = cpLhs.size();
 
 			//±ø¥ó°»´ú
-			if (size == lhs.value.size() && size % 2) {
-				Remainder.value.insert(Remainder.value.begin(), cpLhs.back());
+			if (size == lhs.value.size() && (size-lhsFloatPos) % 2) {
+				Remainder.value.insert(Remainder.value.begin() , cpLhs.back());
 				cpLhs.pop_back();
 			}
 			else if (size == 0) {
-				Remainder.value.insert(Remainder.value.begin(), 0);
-				Remainder.value.insert(Remainder.value.begin(), 0);
+				Remainder.value.insert(Remainder.value.begin() , 0);
+				Remainder.value.insert(Remainder.value.begin() , 0);
 			}
 			else if (size == 1) {
-				Remainder.value.insert(Remainder.value.begin(), cpLhs.back());
+				Remainder.value.insert(Remainder.value.begin() , cpLhs.back());
 				cpLhs.pop_back();
 			}
 			else {
@@ -531,8 +531,7 @@ BigNum operator^(const BigNum& lhs, const BigNum& rhs) {
 				}
 			}
 
-			if (Result.floatPosition == FLOAT_EFFECTIVE_RANGE +1) {
-				Result.floatPosition -= 1;
+			if (Result.floatPosition == FLOAT_EFFECTIVE_RANGE ) {
 				break;
 			}
 		}
