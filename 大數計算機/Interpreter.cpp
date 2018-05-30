@@ -1,19 +1,34 @@
 #include "Interpreter.h"
+#include <string>
+using namespace std;
 //#define Show
 map<string, Decimal> Interpreter::GLOBAL_VAR_MAP;
 
+
+Decimal& Interpreter::getGVM(string id) {
+	if (!GLOBAL_VAR_MAP.count(id)) {
+		cout << "Error! Variable " << id << " Has Not Been Set." << endl;
+		return GLOBAL_VAR_MAP["0"];
+	}
+	return GLOBAL_VAR_MAP[id];
+}
+
 vector<BaseCalcObj*>* Interpreter::Converter(string command) {
+	int rmSpace = 0;
+	while (command[rmSpace] == ' ') {//去除前面空白
+		command.erase(0, 1);
+	}
 	vector<BaseCalcObj*> * out = new vector<BaseCalcObj*>;
 	string variableName = "";//變數名稱(被派值 or 創造)
 	string expression = "";//運算式
 	int mode = checkMode(command, variableName, expression);//0為正常運算 1為dec  2為int 3派值
+	if (mode == 4) {
+		cout << "格式錯誤 請重新輸入\n";
+		return out;
+	}
 	bool pass = checkright(expression);//確認算式正確
-	
 	if (!pass) {
 		cout << "格式錯誤 請重新輸入\n";
-		/*BaseCalcObj *x = new CalcObj_num("0");
-		x->setPrior(0);
-		out->push_back(x);*/
 		return out;
 	}
 
@@ -35,11 +50,11 @@ vector<BaseCalcObj*>* Interpreter::Converter(string command) {
 #endif	
 		if (mode == 1) {
 #ifdef Show
-		cout << "Create Decimal " << variableName << " = " << expression << "___\n";
+			cout << "Create Decimal " << variableName << " = " << expression << "___\n";
 
 #endif
-		GLOBAL_VAR_MAP[variableName] = Decimal();
-		GLOBAL_VAR_MAP[variableName].setPureInt(false);
+			GLOBAL_VAR_MAP[variableName] = Decimal();
+			GLOBAL_VAR_MAP[variableName].setPureInt(false);
 		}
 		else if (mode == 2)
 		{
@@ -50,7 +65,7 @@ vector<BaseCalcObj*>* Interpreter::Converter(string command) {
 			GLOBAL_VAR_MAP[variableName] = Decimal();
 			GLOBAL_VAR_MAP[variableName].setPureInt(true);
 		}
-		 
+
 		//加入變數 和 ' = '
 		{
 			BaseCalcObj*x = new CalcObj_variable(variableName);
@@ -72,17 +87,9 @@ vector<BaseCalcObj*>* Interpreter::Converter(string command) {
 	return out;
 }
 
-
-Decimal& Interpreter::getGVM(string id) {
-	if (!GLOBAL_VAR_MAP.count(id)) {
-		cout << "Error! Variable " << id << " Has Not Been Set." << endl;
-		return GLOBAL_VAR_MAP["default"];
-	}
-	return GLOBAL_VAR_MAP[id];
-}
-
 Interpreter::Interpreter()
 {
+	
 } 
 
 Interpreter::~Interpreter()
@@ -90,6 +97,7 @@ Interpreter::~Interpreter()
 	for (int i = 0; i < obj_list->size(); i++) {
 		delete (*obj_list)[i];
 	}
+	
 }
 
 vector<BaseCalcObj*> Interpreter::Converter_Save(string command) {
@@ -102,67 +110,135 @@ vector<BaseCalcObj*> Interpreter::Converter_Save(string command) {
 
 //判斷模式
 int Interpreter::checkMode(string in, string &var, string &expression) {//0為正常運算 1為dec  2為int 3為派值 4為輸入格式錯誤
-	int variablePlace = 0, mode = 0;
-	int atInt = in.find("Set Integer "), atDec = in.find("Set Decimal ");
-	if (atInt == 0) {
-		variablePlace = 12;
+	int equalPlace = in.find('=');
+	if (equalPlace == -1) {
+		expression.assign(in.begin(),in.end());
+		return 0;
 	}
-	else if (atDec == 0) {
-		variablePlace = 12;
-	}
-	if (ischar(in[variablePlace])) {
-		while (ischar(in[variablePlace]) || isnum(in[variablePlace])) {
-			var += in[variablePlace];
-			variablePlace++;
-		}
-
-	}
-	
-	while (in[variablePlace] == ' ') {
-		variablePlace++;
-	}
-	if (in[variablePlace] == '=') {
-		expression.assign(in.begin() + variablePlace + 1, in.end());
-		if (atDec == 0) {
-			mode = 1;
+	string varCp="";
+	bool getVar = false;
+	varCp.assign(in.begin(),in.begin()+equalPlace);
+	expression.assign(in.begin()+equalPlace+1, in.end());
+	if (varCp.find("Set")==0) {
+		int varInt = varCp.find("Integer");
+		int varDec = varCp.find("Decimal");
+		if (varInt != -1 && varDec != -1) {
 #ifdef Show
-			cout << "Mode :" << mode << " = Set dec\n";
-#endif		
-		}
-		else if (atInt == 0) {
-			mode = 2;
-#ifdef Show			
-			cout << "Mode :" << mode << " = Set int\n";
-#endif		
-		}
-		else if (mode == 0) {
-			mode = 3;
-#ifdef Show			
-			cout << "Mode :" << mode << " = Give num\n";
-#endif
-		}
-	}
-	else {
-		expression.assign(in.begin(), in.end());
-#ifdef Show
-		cout << "Normal calculous\n";
+			cout << "設定指令錯誤(同時設定 INT & DEC )!\n";
 #endif	
+			return 4;
+		}if ( varInt!=-1 && (varInt-0)>=4) {
+			for (int i = 4; i < varInt; i++) {
+				if (varCp[i] != ' ') {
+					#ifdef Show
+					cout << "Integer前面錯誤! \n";
+					#endif	
+					return 4;
+				}
+			}
+			for (int i = varInt + 8; i < varCp.length();i++) {
+				if (varCp[i] == ' ')continue;
+				else if (getVar) {
+					#ifdef Show					
+						cout << "變數名稱錯誤(set int var var)\n";
+					#endif					
+				}
+				if (ischar(varCp[i])) {
+					while ( (ischar(varCp[i]) || isnum(varCp[i])) && i<varCp.length() )
+					{
+						var.push_back(varCp[i]);
+						i++;
+					}
+					getVar = true;
+				}
+				else if (isnum(varCp[i])) {
+					#ifdef Show					
+						cout << "變數名稱錯誤(數字在前)\n";
+					#endif			
+					return 4;
+				}
+			}
+			if(var!="")return 2;
+			else {
+				#ifdef Show
+				cout << "變數名稱空白\n";
+				#endif
+				return 4;
+			}
+		}else if (varDec!=-1 && (varDec - 0) >= 4) {
+			for (int i = 4; i < varDec; i++) {
+				if (varCp[i] != ' ') {
+					#ifdef Show
+					cout << "Dec前面錯誤! \n";
+					#endif	
+					return 4;
+				}
+			}
+			for (int i = varDec + 8; i < varCp.length(); i++) {
+				if (varCp[i] == ' ')continue;
+				else if (getVar) {
+					#ifdef Show					
+						cout << "變數名稱錯誤(set int var var)\n";
+					#endif					
+				}
+				if (ischar(varCp[i])) {
+					while ((ischar(varCp[i]) || isnum(varCp[i])) && i<varCp.length())
+					{
+						var.push_back(varCp[i]);
+						i++;
+					}
+					getVar = true;
+				}else if (isnum(varCp[i])) {
+					#ifdef Show					
+						cout << "變數名稱錯誤(數字在前)\n";
+					#endif			
+					return 4;
+				}
+				
+			}
+			if (var != "")return 1;
+			else {
+				#ifdef Show
+					cout << "變數名稱空白\n";
+				#endif
+				return 4;
+			}
+		}else {
+			cout << "錯誤(沒有指定變數型態)\n";
+			return 4;
+		}
+	}else {
+		for (auto i:var) {
+			if (!(isnum(i)||ischar(i))) {
+#ifdef Show
+				cout << "變數名稱錯誤\n";
+#endif
+				return 4;
+			}
+		}
+		int at = 0;
+		if (ischar(varCp[at])) {
+			while (ischar(varCp[at])||isnum(var[at])) {
+				var.push_back(varCp[at]);
+				at++;
+			}
+			return 3;
+		}
+		else {
+#ifdef Show			
+			cout << "變數名稱錯誤\n";
+#endif			
+			return 4;
+		}
 	}
-	return mode;
+	return 0;
 }
 
 //Check
 bool Interpreter::checkright(string in) {
 	
-	//忽略前面 後面 空白
-	while (in.size() > 0 && in[0] == ' ') {
-		in.erase(in.begin());
-	}
-	while (in.size() > 0 && in.back() == ' ') {
-		in.erase(in.end() - 1);
-	}
-
 	if (in == "")return false;
+
 	//確認非法字元
  	for (auto i:in) {
 		if (!(isnum(i) || ischar(i) || checkoperator(i) || i==' ' || i=='.')) {
@@ -173,7 +249,14 @@ bool Interpreter::checkright(string in) {
 	if (!checkBrackets(in)) return false;
 
 	int i = 0,lastPosition,endPosition=in.length()-1;
-
+	
+	//忽略前面 後面 空白
+	while (in[i]==' ') {
+		i++;
+	}
+	while (in[endPosition]==' ') {
+		endPosition--;
+	}
 	//首符號
 	if (in[i] == '*' || in[i] == '!' || in[i] == '/' || in[i] == '^' || in[i] == '=' || in[i] == ')' || in[i]=='.') {
 #ifdef Show

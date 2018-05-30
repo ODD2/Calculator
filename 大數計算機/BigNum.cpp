@@ -139,6 +139,14 @@ ostream& operator << (ostream& os, const BigNum& rhs) {
 		os << OUT.value[i];
 		if (OUT.floatPosition == i && OUT.floatPosition)cout << '.';
 	}
+	
+#ifdef FUCKING_IDIOT_PROGRAMMING
+	if (OUT.floatPosition < FLOAT_EFFECTIVE_RANGE) {
+		for (int i = OUT.floatPosition; i < FLOAT_EFFECTIVE_RANGE; i++) {
+			cout << "0";
+		}
+	}
+#endif
 
 	return os;
 }

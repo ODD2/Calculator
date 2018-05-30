@@ -11,7 +11,7 @@
 using namespace std;
 
 int main(){
-
+	Interpreter::GLOBAL_VAR_MAP["0"] = BigNum("0");
 	/*Integer i = "123";
 	Decimal d = "123.3";
 	vector<Decimal*> nums;

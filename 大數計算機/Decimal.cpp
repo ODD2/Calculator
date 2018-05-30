@@ -217,6 +217,7 @@ Decimal operator^(const Decimal& lhs, const Decimal& rhs) {
 	BigNum power = rhs.Evaluate();
 	BigNum O("0");
 	BigNum O_5("0.5");
+	
 	if (power.Sign_Pos() == O) {
 		return move(Decimal());
 	}
@@ -229,17 +230,22 @@ Decimal operator^(const Decimal& lhs, const Decimal& rhs) {
 		return move(Decimal());
 	}
 	else {
-
+		Decimal Result = lhs;
 
 		if (power < O && lhs.pureInt) {
 			cout << "Warning: Calculating Negative Power of a Pure Integer." << endl;
 			return move(O);
 		}
+		else if (lhs.pureInt&&rhs.pureInt) {
+		}
+		else {
+			Result.pureInt = false;
+		}
 
 
 		
 
-		Decimal Result = lhs;
+		
 		
 		map<BigNum , BigNum>::iterator Result_it = Result.numerator.begin();
 		//power to numerators;
@@ -261,7 +267,9 @@ Decimal operator^(const Decimal& lhs, const Decimal& rhs) {
 }
 
 Decimal operator!(const Decimal &lhs) {
-	return move(Decimal((!lhs.Evaluate()).PureInt()));
+	Decimal Result = move(Decimal((!lhs.Evaluate()).PureInt()));
+	Result.pureInt = lhs.pureInt;
+	return move(Result);
 }
 
 Decimal operator-(const Decimal & rhs) {
