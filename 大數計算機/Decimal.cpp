@@ -18,18 +18,6 @@ Decimal::~Decimal()
 
 Decimal::Decimal(string str) {
 	*this = Decimal(Interpreter::Converter(str));
-
-	//BigNum In(str);
-
-	//if (In.floatPosition) {
-	//	int swappos = In.floatPosition;
-	//	numerator[In.FloatPoint_Swap(0)]=1;
-	//	denominator[BigNum("1").FloatPoint_Swap(swappos*(-1))] = 1;
-	//}
-	//else {
-	//	numerator[In] = 1;
-	//	denominator[BigNum("1")] = 1;
-	//}
 }
 
 Decimal::Decimal(vector<BaseCalcObj*>* rhs) {
@@ -58,7 +46,6 @@ Decimal::Decimal(const BigNum& rhs) {
 		numerator[rhs] = ONE;
 		denominator[ONE] = ONE;
 	}
-
 }
 
 
@@ -67,6 +54,11 @@ Decimal::Decimal(const BigNum& rhs) {
 Decimal& Decimal::operator=(const Decimal& Dec) {
 	numerator = Dec.numerator;
 	denominator = Dec.denominator;
+	return *this;
+}
+
+Decimal& Decimal::operator=(const BigNum & BN) {
+	*this = move(Decimal(BN));
 	return *this;
 }
 
@@ -114,7 +106,6 @@ Decimal operator+(const Decimal& lhs, const Decimal& rhs) {
 
 
 	Result.Simplification();
-
 	return move(Result);
 }
 
@@ -160,10 +151,14 @@ Decimal operator-(const Decimal& lhs, const Decimal& rhs) {
 
 	Result.Simplification();
 
+
+
+
 	return move(Result);
 }
 
 Decimal operator*(const Decimal& lhs, const Decimal& rhs) {
+	
 	Decimal Result = lhs;
 
 	map<BigNum , BigNum>::const_iterator rhs_numerator_it = rhs.numerator.begin();
@@ -177,30 +172,35 @@ Decimal operator*(const Decimal& lhs, const Decimal& rhs) {
 	}
 
 	Result.Simplification();
+
+
 	return  move(Result);
 }
 
 Decimal operator/(const Decimal& lhs,const Decimal& rhs) {
-	Decimal Result = lhs;
 
-	map<BigNum , BigNum>::const_iterator rhs_numerator_it = rhs.numerator.begin();
-	for (; rhs_numerator_it != rhs.numerator.end(); rhs_numerator_it++) {
-		Result.denominator[rhs_numerator_it->first] += rhs_numerator_it->second;
-	}
+		Decimal Result = lhs;
 
-	map<BigNum , BigNum>::const_iterator rhs_denominator_it = rhs.denominator.begin();
-	for (; rhs_denominator_it != rhs.denominator.end(); rhs_denominator_it++) {
-		Result.numerator[rhs_denominator_it->first] += rhs_denominator_it->second;
-	}
+		map<BigNum, BigNum>::const_iterator rhs_numerator_it = rhs.numerator.begin();
+		for (; rhs_numerator_it != rhs.numerator.end(); rhs_numerator_it++) {
+			Result.denominator[rhs_numerator_it->first] += rhs_numerator_it->second;
+		}
 
-	Result.Simplification();
-	return  move(Result);
+		map<BigNum, BigNum>::const_iterator rhs_denominator_it = rhs.denominator.begin();
+		for (; rhs_denominator_it != rhs.denominator.end(); rhs_denominator_it++) {
+			Result.numerator[rhs_denominator_it->first] += rhs_denominator_it->second;
+		}
+
+		Result.Simplification();
+		return  move(Result);
+
 }
 
 Decimal operator^(const Decimal& lhs, const Decimal& rhs) {
 	BigNum power = rhs.Evaluate();
 	BigNum O("0");
 	BigNum O_5("0.5");
+	
 	if (power.Sign_Pos() == O) {
 		return move(Decimal());
 	}
@@ -214,7 +214,7 @@ Decimal operator^(const Decimal& lhs, const Decimal& rhs) {
 	}
 	else {
 		Decimal Result = lhs;
-		
+
 		map<BigNum , BigNum>::iterator Result_it = Result.numerator.begin();
 		//power to numerators;
 		for (; Result_it != Result.numerator.end(); Result_it++)
@@ -235,7 +235,7 @@ Decimal operator^(const Decimal& lhs, const Decimal& rhs) {
 }
 
 Decimal operator!(const Decimal &lhs) {
-	return move(Decimal((!lhs.Evaluate())));
+	return move(Decimal(!lhs.Evaluate()));
 }
 
 Decimal operator-(const Decimal & rhs) {
@@ -256,7 +256,8 @@ ostream& operator << (ostream& os, const Decimal& rhs) {
 	rhs.Combination(os);
 	os << ",Evaluate:";
 #endif // 
-	os <<  rhs.Evaluate();
+	BigNum Result = rhs.Evaluate();
+	os <<  Result;
 
 	return os;
 }

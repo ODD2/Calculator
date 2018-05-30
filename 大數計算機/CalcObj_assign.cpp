@@ -32,6 +32,22 @@ Decimal CalcObj_assign::Operate(vector<BaseCalcObj*> * Obj_list, int index) cons
 	this->Divide(Obj_list, index, lhs, rhs);
 
 	int rhs_next_index = Prior_FindLowest(rhs);
-	string variable = (*lhs)[0]->getIdentity();
-	return Interpreter::GLOBAL_VAR_MAP[variable] = (*rhs)[rhs_next_index]->Operate(rhs, rhs_next_index);
+	string id = (*lhs)[0]->getIdentity();
+
+
+	//防止未定義變數
+	if (!Interpreter::GLOBAL_VAR_MAP.count(id)) {
+		cout << "Error! Assignment to Unknown Variable:" << id << endl;
+		return Decimal();
+	}
+
+
+	//計算算式的值
+	Decimal value= (*rhs)[rhs_next_index]->Operate(rhs, rhs_next_index);
+
+	//輸入值到變數
+	Interpreter::GLOBAL_VAR_MAP[id] = value.Evaluate();
+
+	//回傳變數
+	return Interpreter::GLOBAL_VAR_MAP[id];
 }

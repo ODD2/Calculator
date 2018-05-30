@@ -21,7 +21,6 @@ BigNum::BigNum(string value){
 	//get value
 	for (int i = 0; i < value.size(); i++) {
 		if (value[i] == '.') {
-			pureInt = false;
 			floatPosition = value.size() - 1 - i;
 			continue;
 		}
@@ -37,14 +36,12 @@ BigNum::BigNum(const BigNum& rhs) {
 	this->value = rhs.value;
 	this->floatPosition = rhs.floatPosition;
 	this->sign = rhs.sign;
-	this->pureInt = rhs.pureInt;
 }
 
 BigNum::BigNum(BigNum&& rhs) {
 	this->value = move(rhs.value);
 	this->floatPosition = rhs.floatPosition;
 	this->sign = rhs.sign;
-	this->pureInt = rhs.pureInt;
 }
 
 BigNum::BigNum(double rhs):BigNum(to_string(rhs)) {
@@ -56,7 +53,6 @@ BigNum& BigNum::operator=(const  BigNum& rhs) {
 	this->value = rhs.value;
 	this->floatPosition = rhs.floatPosition;
 	this->sign = rhs.sign;
-	this->pureInt = rhs.pureInt;
 	return *this;
 }
 
@@ -64,7 +60,6 @@ BigNum& BigNum::operator=(BigNum&& rhs) {
 	this->value = move(rhs.value);
 	this->floatPosition = rhs.floatPosition;
 	this->sign = rhs.sign;
-	this->pureInt = rhs.pureInt;
 	return *this;
 }
 
@@ -109,7 +104,6 @@ istream& operator >> (istream& is, BigNum& rhs) {
 	//initialization
 	for (int i = 0; i < value.size(); i++) {
 		if (value[i] == '.') {
-			rhs.pureInt = false;
 			rhs.floatPosition = value.size()-1-i;
 			continue;
 		}
@@ -123,21 +117,18 @@ istream& operator >> (istream& is, BigNum& rhs) {
 }
 
 ostream& operator << (ostream& os, const BigNum& rhs) {
-	BigNum OUT(rhs.FloatPoint_Cut(FLOAT_EFFECTIVE_RANGE));
-	OUT.Num_CheckClose();
-	OUT.Num_CheckRedundant();
 
-	if (!(OUT.sign))cout << '-';
+	if (!(rhs.sign))cout << '-';
 
 	int end = 0;
 
-	if (OUT.floatPosition > FLOAT_EFFECTIVE_RANGE) {
-		end = OUT.floatPosition - FLOAT_EFFECTIVE_RANGE;
+	if (rhs.floatPosition > FLOAT_EFFECTIVE_RANGE) {
+		end = rhs.floatPosition - FLOAT_EFFECTIVE_RANGE;
 	}
 
-	for (int i = OUT.value.size() - 1; i >= end; i--) {
-		os << OUT.value[i];
-		if (OUT.floatPosition == i && OUT.floatPosition)cout << '.';
+	for (int i = rhs.value.size() - 1; i >= end; i--) {
+		os << rhs.value[i];
+		if (rhs.floatPosition == i && rhs.floatPosition)cout << '.';
 	}
 
 	return os;
@@ -464,32 +455,103 @@ BigNum operator^(const BigNum& lhs, const BigNum& rhs) {
 	}
 
 	BigNum Two("2");
-	BigNum Result("1");
+	BigNum Result("1"); 
 
 	//需要根號
 	if (_0_5_times % Two != Zero)
 	{
-		/*-----------牛頓求值法-----------*/
+		
+		vector<int> cpLhs = lhs.value;
+		int lhsFloatPos = lhs.floatPosition;
 
-		BigNum Value = lhs.Sign_Pos();//n
+		BigNum Remainder; Remainder.value.clear();
+		BigNum Runner; Runner.value.clear();
+		Result.value.clear();
 
-		BigNum Root = lhs.Sign_Pos();//x
 
-		while (1)
-		{
-			/*
-			f(x) = x^2 - n
-			f'(x) = 2*x
-			Xn =  x^2 - f(x)/f'(x)  =>  (x^2 + n)/2*n
-			*/
-			BigNum NewtonMethod = move(((Root*Root) + Value) / (BigNum("2")*Root));
-			if (Root.FloatPoint_Cut(FLOAT_EFFECTIVE_RANGE) == NewtonMethod.FloatPoint_Cut(FLOAT_EFFECTIVE_RANGE))
-			{
+		while (1) {
+			int size = cpLhs.size();
+
+			//條件偵測
+			if (size == lhs.value.size() && (size-lhsFloatPos) % 2) {
+				Remainder.value.insert(Remainder.value.begin() , cpLhs.back());
+				cpLhs.pop_back();
+			}
+			else if (size == 0) {
+				Remainder.value.insert(Remainder.value.begin() , 0);
+				Remainder.value.insert(Remainder.value.begin() , 0);
+			}
+			else if (size == 1) {
+				Remainder.value.insert(Remainder.value.begin() , cpLhs.back());
+				cpLhs.pop_back();
+			}
+			else {
+				Remainder.value.insert(Remainder.value.begin(), cpLhs.back());
+				cpLhs.pop_back();
+				Remainder.value.insert(Remainder.value.begin(), cpLhs.back());
+				cpLhs.pop_back();
+			}
+
+
+			Runner.value.insert(Runner.value.begin(), 0);
+			for (int i = 9; i >= 0; i--) {
+				//嘗試數值有沒有超過
+				Runner.value[0] = i;
+
+				BigNum Tester(i);
+				BigNum Product = Runner * Tester;
+				
+				if (Product <= Remainder) {
+					//符合條件
+					Result.value.insert(Result.value.begin(), i);
+
+					//小數點條件
+					if (size <= lhsFloatPos) {
+						Result.floatPosition += 1;
+					}
+
+
+					Remainder -= Product;
+					Runner += Tester;
+
+					if (Remainder == Zero) {
+						Remainder.value.pop_back();
+					}
+
+					break;
+				}
+			}
+
+			if (Result.floatPosition == FLOAT_EFFECTIVE_RANGE ) {
 				break;
 			}
-			Root = NewtonMethod;
 		}
-		Result = Result *  Root;
+
+
+
+
+		///*-----------牛頓求值法-----------*/
+
+		//BigNum Value = lhs.Sign_Pos();//n
+
+		//BigNum Root = lhs.Sign_Pos();//x
+
+		//while (1)
+		//{
+		//	/*
+		//	f(x) = x^2 - n
+		//	f'(x) = 2*x
+		//	Xn =  x^2 - f(x)/f'(x)  =>  (x^2 + n)/2*n
+		//	*/
+		//	BigNum NewtonMethod = move(((Root*Root) + Value) / (BigNum("2")*Root));
+		//	if (Root.FloatPoint_Cut(FLOAT_EFFECTIVE_RANGE) == NewtonMethod.FloatPoint_Cut(FLOAT_EFFECTIVE_RANGE))
+		//	{
+		//		break;
+		//	}
+		//	Root = NewtonMethod;
+		//}
+		//Result = Result *  Root;
+
 	}	
 	//整數次方
 	for (; _0_5_times >= Two ; ) {

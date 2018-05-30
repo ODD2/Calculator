@@ -20,9 +20,10 @@ public:
 	Decimal(Decimal&&);
 	Decimal(string);
 	Decimal(vector<BaseCalcObj*>*);
-	~Decimal();
+	virtual ~Decimal();
 	Decimal(const BigNum &);
 	Decimal& operator=(const Decimal&);
+	Decimal& operator=(const BigNum & BN);
 
 	friend Decimal operator+(const Decimal&,const Decimal&);
 	friend Decimal operator-(const Decimal&, const Decimal&);
@@ -40,7 +41,6 @@ public:
 
 	BigNum Evaluate() const;
 	void Combination(ostream&) const;
-
 protected:
 	map<BigNum , BigNum> numerator;
 	map<BigNum , BigNum> denominator;

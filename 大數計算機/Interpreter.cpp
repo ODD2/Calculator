@@ -1,16 +1,35 @@
 #include "Interpreter.h"
-
+#include <string>
+using namespace std;
+//#define Show
 map<string, Decimal> Interpreter::GLOBAL_VAR_MAP;
 
+
+Decimal& Interpreter::getGVM(string id) {
+	if (!GLOBAL_VAR_MAP.count(id)) {
+		cout << "Error! Variable " << id << " Has Not Been Set." << endl;
+		return GLOBAL_VAR_MAP["0"];
+	}
+	return GLOBAL_VAR_MAP[id];
+}
+
 vector<BaseCalcObj*>* Interpreter::Converter(string command) {
+	int rmSpace = 0;
+	while (command[rmSpace] == ' ') {//去除前面空白
+		command.erase(0, 1);
+	}
 	vector<BaseCalcObj*> * out = new vector<BaseCalcObj*>;
-	string variableNmae = "";//變數名稱(被派值 or 創造)
+	string variableName = "";//變數名稱(被派值 or 創造)
 	string expression = "";//運算式
-	int mode = checkMode(command, variableNmae, expression);//0為正常運算 1為dec  2為int 3派值
+	int mode = checkMode(command, variableName, expression);//0為正常運算 1為dec  2為int 3派值
+	if (mode == 4) {
+		cout << "格式錯誤 請重新輸入\n";
+		return out;
+	}
 	bool pass = checkright(expression);//確認算式正確
 	if (!pass) {
-		cout << "Error\n";
-		return new vector<BaseCalcObj*>;
+		cout << "格式錯誤 請重新輸入\n";
+		return out;
 	}
 
 	//正負號轉換 & 簡化
@@ -19,29 +38,56 @@ vector<BaseCalcObj*>* Interpreter::Converter(string command) {
 	switch (mode)
 	{
 	case 0://一般運算
+#ifdef Show
 		cout << "運算" << expression << "___\n";
+#endif 
 		break;
 	case 1://Set Decimal
-		cout << "Create Decimal " << variableNmae << " = " << expression << "___\n";
-		break;
 	case 2://Set Interger
-		cout << "Create Interger " << variableNmae << " = " << expression << "___\n";
-		break;
 	case 3://派值
-		cout << variableNmae << " be set to " << expression << "___\n";
+#ifdef Show		
+		cout << variableName << " be set to " << expression << "___\n";
+#endif	
+		if (mode == 1) {
+#ifdef Show
+			cout << "Create Decimal " << variableName << " = " << expression << "___\n";
+
+#endif
+			GLOBAL_VAR_MAP[variableName] = Decimal();
+		}
+		else if (mode == 2)
+		{
+#ifdef Show
+			cout << "Create Interger " << variableName << " = " << expression << "___\n";
+#endif	
+			cout << "Integer Not Supported, Creating Decimal" << endl;
+			GLOBAL_VAR_MAP[variableName] = Decimal();
+		}
+
+		//加入變數 和 ' = '
+		{
+			BaseCalcObj*x = new CalcObj_variable(variableName);
+			x->setPrior(0);
+			out->push_back(x);
+
+			BaseCalcObj*y = new CalcObj_assign("=");
+			y->setPrior(-1);
+			out->push_back(y);
+		}
 		break;
+
 	default:
-		return new vector<BaseCalcObj*>;
+		return out;
 		break;
 	}
 	//將數字轉為object
 	toUnit(expression, out);
-
 	return out;
 }
 
 Interpreter::Interpreter()
 {
+	
 } 
 
 Interpreter::~Interpreter()
@@ -49,6 +95,7 @@ Interpreter::~Interpreter()
 	for (int i = 0; i < obj_list->size(); i++) {
 		delete (*obj_list)[i];
 	}
+	
 }
 
 vector<BaseCalcObj*> Interpreter::Converter_Save(string command) {
@@ -59,83 +106,361 @@ vector<BaseCalcObj*> Interpreter::Converter_Save(string command) {
 
 /* ========== TOOLS ========== */
 
+//判斷模式
 int Interpreter::checkMode(string in, string &var, string &expression) {//0為正常運算 1為dec  2為int 3為派值 4為輸入格式錯誤
-	int variablePlace = 0, mode = 0;
-	int atInt = in.find("Set Integer "), atDec = in.find("Set Decimal ");
-	if (atInt == 0) {
-		variablePlace = 12;
+	int equalPlace = in.find('=');
+	if (equalPlace == -1) {
+		expression.assign(in.begin(),in.end());
+		return 0;
 	}
-	else if (atDec == 0) {
-		variablePlace = 12;
-	}
-	while (ischar(in[variablePlace])) {
-		var += in[variablePlace];
-		variablePlace++;
-	}
-	while (in[variablePlace] == ' ') {
-		variablePlace++;
-	}
-	if (in[variablePlace] == '=') {
-		expression.assign(in.begin() + variablePlace + 1, in.end());
-		if (atDec == 0) {
-			mode = 1;
-			cout << "Mode :" << mode << " = Set dec\n";
+	string varCp="";
+	bool getVar = false;
+	varCp.assign(in.begin(),in.begin()+equalPlace);
+	expression.assign(in.begin()+equalPlace+1, in.end());
+	if (varCp.find("Set")==0) {
+		int varInt = varCp.find("Integer");
+		int varDec = varCp.find("Decimal");
+		if (varInt != -1 && varDec != -1) {
+#ifdef Show
+			cout << "設定指令錯誤(同時設定 INT & DEC )!\n";
+#endif	
+			return 4;
+		}if ( varInt!=-1 && (varInt-0)>=4) {
+			for (int i = 4; i < varInt; i++) {
+				if (varCp[i] != ' ') {
+					#ifdef Show
+					cout << "Integer前面錯誤! \n";
+					#endif	
+					return 4;
+				}
+			}
+			for (int i = varInt + 8; i < varCp.length();i++) {
+				if (varCp[i] == ' ')continue;
+				else if (getVar) {
+					#ifdef Show					
+						cout << "變數名稱錯誤(set int var var)\n";
+					#endif					
+				}
+				if (ischar(varCp[i])) {
+					while ( (ischar(varCp[i]) || isnum(varCp[i])) && i<varCp.length() )
+					{
+						var.push_back(varCp[i]);
+						i++;
+					}
+					getVar = true;
+				}
+				else if (isnum(varCp[i])) {
+					#ifdef Show					
+						cout << "變數名稱錯誤(數字在前)\n";
+					#endif			
+					return 4;
+				}
+			}
+			if(var!="")return 2;
+			else {
+				#ifdef Show
+				cout << "變數名稱空白\n";
+				#endif
+				return 4;
+			}
+		}else if (varDec!=-1 && (varDec - 0) >= 4) {
+			for (int i = 4; i < varDec; i++) {
+				if (varCp[i] != ' ') {
+					#ifdef Show
+					cout << "Dec前面錯誤! \n";
+					#endif	
+					return 4;
+				}
+			}
+			for (int i = varDec + 8; i < varCp.length(); i++) {
+				if (varCp[i] == ' ')continue;
+				else if (getVar) {
+					#ifdef Show					
+						cout << "變數名稱錯誤(set int var var)\n";
+					#endif					
+				}
+				if (ischar(varCp[i])) {
+					while ((ischar(varCp[i]) || isnum(varCp[i])) && i<varCp.length())
+					{
+						var.push_back(varCp[i]);
+						i++;
+					}
+					getVar = true;
+				}else if (isnum(varCp[i])) {
+					#ifdef Show					
+						cout << "變數名稱錯誤(數字在前)\n";
+					#endif			
+					return 4;
+				}
+				
+			}
+			if (var != "")return 1;
+			else {
+				#ifdef Show
+					cout << "變數名稱空白\n";
+				#endif
+				return 4;
+			}
+		}else {
+			cout << "錯誤(沒有指定變數型態)\n";
+			return 4;
 		}
-		else if (atInt == 0) {
-			mode = 2;
-			cout << "Mode :" << mode << " = Set int\n";
+	}else {
+		for (auto i:var) {
+			if (!(isnum(i)||ischar(i))) {
+#ifdef Show
+				cout << "變數名稱錯誤\n";
+#endif
+				return 4;
+			}
 		}
-		else if (mode == 0) {
-			mode = 3;
-			cout << "Mode :" << mode << " = Give num\n";
+		int at = 0;
+		if (ischar(varCp[at])) {
+			while (ischar(varCp[at])||isnum(var[at])) {
+				var.push_back(varCp[at]);
+				at++;
+			}
+			return 3;
+		}
+		else {
+#ifdef Show			
+			cout << "變數名稱錯誤\n";
+#endif			
+			return 4;
 		}
 	}
-	else {
-		expression.assign(in.begin(), in.end());
-		cout << "Normal calculous\n";
-	}
-	return mode;
+	return 0;
 }
 
 //Check
 bool Interpreter::checkright(string in) {
+	
+	if (in == "")return false;
 
-
-	return true;
-	/*if (in == "")return false;
 	//確認非法字元
-	for (auto i:in) {
-	if (!(isnum(i) || ischar(i) || checkoperator(i) || i==' ' || i=='.'||i=='=')) {
-	return false;
+ 	for (auto i:in) {
+		if (!(isnum(i) || ischar(i) || checkoperator(i) || i==' ' || i=='.')) {
+			return false;
+		}
 	}
-	}
-	//確認變數相鄰
-	int variablecount = 0;
-	for (int i = 0; i < in.length();i++) {
-	bool findVariable=false;
+	//判斷括號正確(對稱)
+	if (!checkBrackets(in)) return false;
 
-	while (ischar(in[i]) )
-	{
+	int i = 0,lastPosition,endPosition=in.length()-1;
+	
+	//忽略前面 後面 空白
+	while (in[i]==' ') {
+		i++;
+	}
+	while (in[endPosition]==' ') {
+		endPosition--;
+	}
+	//首符號
+	if (in[i] == '*' || in[i] == '!' || in[i] == '/' || in[i] == '^' || in[i] == '=' || in[i] == ')' || in[i]=='.') {
+#ifdef Show
+		cout << "First element Error!\n";
+#endif 
+		return false;
+	}
+	//尾符號
+	if (  checkoperator(in[endPosition]) && in[endPosition]!=')'  && in[endPosition] != '!'  ) {
+#ifdef Show
+		cout << "Final element Error!\n";
+#endif 
+		return false;
+	}
 
-	if (!findVariable) {
-	if ( i != 0 && (  (in[i - 1] == ')') || (in[i - 1] == '!')  || (in[i - 1] == '.') || (in[i - 1] == '!')   )) return false;//ex:  (1+1)apple
-	findVariable = true;
-	}
-	i++;//找到變數後一位
-	}
-	if (findVariable) {
-	while(in[i]==' ') {
-	i++;
-	}
-	if ( ischar(in[i]) || isnum(in[i]) || in[i]=='('  )return false;//變數後接 "變數" "數字" '(' 都不行
-	}
-	}
-	//運算子不能相鄰(正負號前可遇到運算子)
-	for (int i = 0; i < in.length(); i++) {
-	}
-	return true;*/
+	bool firstFind=false;
+	for (i,lastPosition = 0; i < in.length(); i++) {//開始
+		if (in[i] == ' ')continue;
+		if (ischar(in[i])) {
+			if (!firstFind) {
+				firstFind = true;
+			}else {
+				if ((in[lastPosition] == '!' || isnum(in[lastPosition]) || ischar(in[lastPosition]))) {//變數前不能有 ! num char
+#ifdef Show
+					cout << "variable before Error!";
+#endif
+					return false;
+				}
+			}
+			while ( ischar(in[i]) || isnum(in[i])) {
+				i++;
+			}
+			i--;
+			lastPosition = i;//紀錄變數最後位置
+		}
+		//==========='('
+		else if (in[i]=='(') {
+			if (!firstFind) {
+				firstFind = true;
+			}
+			else {
+				if (in[lastPosition] == '!' || isnum(in[lastPosition]) || ischar(in[lastPosition]) || in[lastPosition]==')') {
+#ifdef Show
+					cout << "( before Error!";
+#endif
+					return false;
+				}
+			}
+			lastPosition = i;
+			while (in[i+1]==' ') {
+				i++;
+			}
+			if ((checkoperator(in[i+1])&& (in[i+1]!='+' && in[i+1]!='-' && in[i + 1] != '(')  )&& i!=endPosition) {
+#ifdef Show
+				cout << "( after Error!";
+#endif
+				return false;
+			}
+		}
+		//===========')'
+		else if (in[i] == ')') {
+			
+			if (  checkoperator(in[lastPosition])&&in[lastPosition]!=')') {
+#ifdef Show
+				cout << " ) before Error!\n";
+#endif
+				return false;
+			}
+			lastPosition = i;
+			while (in[i + 1] == ' ') {// ) 123a 
+				i++;
+			}
+			if (!checkoperator(in[i + 1]) && i!=endPosition) {
+#ifdef Show
+				cout << ") after Error!\n";
+#endif
+				return false;
+			}
+		}
+		else if ( isnum(in[i]) ) {
+			int dotNums = 0,numNums=0;
+			if (!firstFind) {
+				firstFind = true;
+			}
+			else {
+				if ((ischar(in[lastPosition]) || isnum(in[lastPosition]) || in[lastPosition] == '!')) {
+#ifdef Show
+					cout << "num before Error!\n";
+#endif
+					return false;
+				}
+			}
+			while ( isnum(in[i]) || in[i]=='.' ) {
+				if (numNums==0 && in[i]=='.') {
+#ifdef Show
+					cout << "before  '.' is empty !\n";
+#endif
+					return false;
+				}else if (in[i] == '.')dotNums++;
+				else numNums++;
+
+				if (dotNums == 2) {
+#ifdef Show
+					cout << " '.' Error\n";
+#endif
+					return false;
+				}
+				i++;
+			}
+			i--;
+			lastPosition = i;
+		}
+		else if (in[i]=='.') {
+#ifdef Show
+			cout << " '.' Error\n";
+#endif
+			return false;
+		}
+		else if (is_operator(in[i])) {
+			switch (in[i])
+			{
+			case '*':
+				if (in[i + 1] == '*' || in[i + 1] == '!' || in[i + 1] == '/' || in[i + 1] == '^') {
+#ifdef Show
+					cout << " '*' Error\n";
+#endif
+					return false;
+				}
+				break;
+			case '/':
+				if (in[i + 1] == '+' || in[i + 1] == '-' || in[i + 1] == '*' || in[i + 1] == '/' || in[i + 1] == '^' || in[i + 1] == '!') {
+#ifdef Show
+					cout << " '/' Error\n";
+#endif
+					return false;
+				}
+				break;
+			case '^':
+				if ( in[i + 1] == '*' || in[i + 1] == '/' || in[i + 1] == '^' || in[i + 1] == '!' ) {
+#ifdef Show
+					cout << " '^' Error\n";
+#endif
+					return false;
+				}
+				break;
+			case '+':
+				if (in[i + 1] == '*' || in[i + 1] == '/' || in[i + 1] == '^' || in[i + 1] == '!') {
+#ifdef Show
+					cout << " '+' Error\n";
+#endif
+					return false;
+				}
+				break;
+			case '-':
+				if (in[i + 1] == '*' || in[i + 1] == '/' || in[i + 1] == '^' || in[i + 1] == '!') {
+#ifdef Show
+					cout << " '-' Error\n";
+#endif
+					return false;
+				}
+				break;
+			default:
+				break;
+			}
+
+
+			
+
+			lastPosition = i;
+		}
+		else {
+			lastPosition = i;
+		}
+}
+	return true;
 }
 
+
+//括號
+bool Interpreter::checkBrackets(string in) {
+
+	vector<char>stack;
+	for (int i = 0; i < in.length(); i++) {
+		if (in[i]=='(') {
+			stack.push_back('(');
+		}
+		if (in[i] == ')') {
+			if (stack.size() && stack[0] == '('){
+				stack.pop_back();
+				continue;
+			}else{
+				return false;
+			}
+		}
+	}
+	if (!stack.size()) {
+		return true;
+	}else {
+#ifdef Show
+		cout << "Brackets Error!\n";
+#endif		
+		return false;
+	}
+		
+}
+//operator   "不"包含正負 輸入檢測用
 bool Interpreter::checkoperator(char c) {
 	string ope = "()!^+-*/";
 	for (int i = 0; i < ope.length(); i++) {
@@ -163,7 +488,7 @@ bool Interpreter::is_plus_minus(char c) {
 	return false;
 }
 
-//operator
+//operator 包含正負
 bool Interpreter::is_operator(char c) {
 	string ope = "()!^+-*/#_";
 	for (int i = 0; i < ope.length(); i++) {
@@ -196,8 +521,7 @@ void Interpreter::changeSign(string &in) {
 			}
 			else if (in[i + 1] == '(') {//右邊有'(' 維持原樣
 
-			}
-			else if ((is_operator(in[i - 1]) && is_operator(in[i + 1]))) {//左右兩邊都是operator 歸類為正負號
+			}else if ((is_operator(in[i - 1]) && is_operator(in[i + 1]))) {//左右兩邊都是operator 歸類為正負號
 				if (in[i] == '-')in[i] = '_';
 				else in[i] = '#';
 			}
@@ -279,7 +603,10 @@ void Interpreter::toUnit(string in, vector<BaseCalcObj*>* out) {
 				i++;
 			}
 			i--;
-#if DEBUG >=2
+			BaseCalcObj*x = new CalcObj_variable(varbuff);
+			x->setPrior(0);
+			out->push_back(x);
+#ifdef Show
 			cout << "got Var : " << varbuff << " pri=0" << getPriority(varbuff[0], basepri) << "\n";
 #endif
 		}
@@ -293,8 +620,9 @@ void Interpreter::toUnit(string in, vector<BaseCalcObj*>* out) {
 			BaseCalcObj*x = new CalcObj_num(numbuff);
 			x->setPrior(0);
 			out->push_back(x);
+#ifdef Show
 			cout << "got Num : " << numbuff << " pri=0" << "\n";
-
+#endif
 		}
 		else if (is_operator(in[i])) {
 
@@ -312,49 +640,63 @@ void Interpreter::toUnit(string in, vector<BaseCalcObj*>* out) {
 				BaseCalcObj* x = new  CalcObj_factorial("!");
 				x->setPrior(pri);
 				out->push_back(x);
+#ifdef Show
 				cout << "got sign " << sign << " pri=" << pri << "\n";
+#endif			
 			}
 			else if (sign == '^')
 			{
 				BaseCalcObj* x = new CalcObj_power("^");
 				x->setPrior(pri + powerNum);
 				out->push_back(x);
+#ifdef Show		
 				cout << "got sign " << sign << " pri=" << pri + powerNum << "\n";
+#endif			
 			}
 			else if (sign == '+')
 			{
 				BaseCalcObj* x = new CalcObj_plus("+");
 				x->setPrior(pri);
 				out->push_back(x);
+#ifdef Show		
 				cout << "got sign " << sign << " pri=" << pri << "\n";
+#endif			
 			}
 			else if (sign == '-')
 			{
 				BaseCalcObj* x = new CalcObj_minus("-");
 				x->setPrior(pri);
 				out->push_back(x);
+#ifdef Show		
 				cout << "got sign " << sign << " pri=" << pri << "\n";
+#endif			
 			}
 			else if (sign == '*')
 			{
 				BaseCalcObj* x = new CalcObj_multi("*");
 				x->setPrior(pri);
 				out->push_back(x);
+#ifdef Show				
 				cout << "got sign " << sign << " pri=" << pri << "\n";
+#endif
 			}
 			else if (sign == '/')
 			{
 				BaseCalcObj* x = new CalcObj_div("/");
 				x->setPrior(pri);
 				out->push_back(x);
+#ifdef Show		
 				cout << "got sign " << sign << " pri=" << pri << "\n";
+#endif			
 			}
 			else if (sign == '_')
 			{
 				BaseCalcObj* x = new CalcObj_neg("_");
 				x->setPrior(pri);
 				out->push_back(x);
+#ifdef Show		
 				cout << "got sign " << sign << " pri=" << pri << "\n";
+#endif			
 			}
 			previousElement = sign;
 		}

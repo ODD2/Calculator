@@ -60,7 +60,6 @@ public:
 
 	int getFloatPosition() const { return floatPosition; }
 	bool  getSign() const { return sign; }
-	bool getPureInt() const { return pureInt; }
 
 	BigNum Sign_Pos() const;
 	BigNum Sign_Neg() const;
@@ -69,11 +68,13 @@ public:
 
 	BigNum GCD(const BigNum&) const;
 
+	BigNum FloatPoint_Swap(int)const;
+	BigNum FloatPoint_Cut(int)const;
+
 protected:
 	vector<int> value;
 	int floatPosition = 0;
 	bool sign = true;
-	bool pureInt = true;
 
 	void Refine();
 
@@ -85,10 +86,5 @@ protected:
 	bool Num_CheckClose();
 	bool Num_CheckCloseTo1();
 	bool Num_CheckCloseTo0();
-	
-	
-	BigNum FloatPoint_Swap(int)const;
-	BigNum FloatPoint_Cut(int)const;
-
 };
 
