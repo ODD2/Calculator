@@ -20,7 +20,7 @@ public:
 	Decimal(Decimal&&);
 	Decimal(string);
 	Decimal(vector<BaseCalcObj*>*);
-	~Decimal();
+	virtual ~Decimal();
 	Decimal(const BigNum &);
 	Decimal& operator=(const Decimal&);
 	Decimal& operator=(const BigNum & BN);

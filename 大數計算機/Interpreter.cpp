@@ -8,9 +8,13 @@ vector<BaseCalcObj*>* Interpreter::Converter(string command) {
 	string expression = "";//¹Bºâ¦¡
 	int mode = checkMode(command, variableName, expression);//0¬°¥¿±`¹Bºâ 1¬°dec  2¬°int 3¬£­È
 	bool pass = checkright(expression);//½T»{ºâ¦¡¥¿½T
+	
 	if (!pass) {
-		cout << "Error\n";
-		return new vector<BaseCalcObj*>;
+		cout << "®æ¦¡¿ù»~ ½Ð­«·s¿é¤J\n";
+		/*BaseCalcObj *x = new CalcObj_num("0");
+		x->setPrior(0);
+		out->push_back(x);*/
+		return out;
 	}
 
 	//¥¿­t¸¹Âà´« & Â²¤Æ
@@ -24,47 +28,50 @@ vector<BaseCalcObj*>* Interpreter::Converter(string command) {
 #endif 
 		break;
 	case 1://Set Decimal
-
 	case 2://Set Interger
-	
 	case 3://¬£­È
 #ifdef Show		
 		cout << variableName << " be set to " << expression << "___\n";
-#endif		
-		//¥[¤JÅÜ¼Æ ©M ' = '
-		
-		if (mode == 2)
-		{
-			GLOBAL_VAR_MAP[variableName] = Decimal();
+#endif	
+		if (mode == 1) {
 #ifdef Show
-			cout << "Create Decimal " << variableName << " = " << expression << "___\n";
+		cout << "Create Decimal " << variableName << " = " << expression << "___\n";
 
 #endif
-			GLOBAL_VAR_MAP[variableName].setPureInt(true);
+		GLOBAL_VAR_MAP[variableName] = Decimal();
+		GLOBAL_VAR_MAP[variableName].setPureInt(false);
 		}
-		else if (mode == 1) {
-			GLOBAL_VAR_MAP[variableName] = Decimal();
+		else if (mode == 2)
+		{
 #ifdef Show
 			cout << "Create Interger " << variableName << " = " << expression << "___\n";
 #endif	
-			GLOBAL_VAR_MAP[variableName].setPureInt(false);
-		}
 
-		{BaseCalcObj*x = new CalcObj_variable(variableName);
-		x->setPrior(0);
-		out->push_back(x);
-		BaseCalcObj*y = new CalcObj_assign("=");
-		y->setPrior(-1);
-		out->push_back(y); }
+			GLOBAL_VAR_MAP[variableName] = Decimal();
+			GLOBAL_VAR_MAP[variableName].setPureInt(true);
+		}
+		 
+		//¥[¤JÅÜ¼Æ ©M ' = '
+		{
+			BaseCalcObj*x = new CalcObj_variable(variableName);
+			x->setPrior(0);
+			out->push_back(x);
+
+			BaseCalcObj*y = new CalcObj_assign("=");
+			y->setPrior(-1);
+			out->push_back(y);
+		}
 		break;
+
 	default:
-		return new vector<BaseCalcObj*>;
+		return out;
 		break;
 	}
 	//±N¼Æ¦rÂà¬°object
 	toUnit(expression, out);
 	return out;
 }
+
 
 Decimal& Interpreter::getGVM(string id) {
 	if (!GLOBAL_VAR_MAP.count(id)) {
@@ -93,6 +100,7 @@ vector<BaseCalcObj*> Interpreter::Converter_Save(string command) {
 
 /* ========== TOOLS ========== */
 
+//§PÂ_¼Ò¦¡
 int Interpreter::checkMode(string in, string &var, string &expression) {//0¬°¥¿±`¹Bºâ 1¬°dec  2¬°int 3¬°¬£­È 4¬°¿é¤J®æ¦¡¿ù»~
 	int variablePlace = 0, mode = 0;
 	int atInt = in.find("Set Integer "), atDec = in.find("Set Decimal ");
@@ -102,10 +110,14 @@ int Interpreter::checkMode(string in, string &var, string &expression) {//0¬°¥¿±
 	else if (atDec == 0) {
 		variablePlace = 12;
 	}
-	while (ischar(in[variablePlace])) {
-		var += in[variablePlace];
-		variablePlace++;
+	if (ischar(in[variablePlace])) {
+		while (ischar(in[variablePlace]) || isnum(in[variablePlace])) {
+			var += in[variablePlace];
+			variablePlace++;
+		}
+
 	}
+	
 	while (in[variablePlace] == ' ') {
 		variablePlace++;
 	}
@@ -141,40 +153,233 @@ int Interpreter::checkMode(string in, string &var, string &expression) {//0¬°¥¿±
 
 //Check
 bool Interpreter::checkright(string in) {
+	
+	//©¿²¤«e­± «á­± ªÅ¥Õ
+	while (in.size() > 0 && in[0] == ' ') {
+		in.erase(in.begin());
+	}
+	while (in.size() > 0 && in.back() == ' ') {
+		in.erase(in.end() - 1);
+	}
 
-	/*if (in == "")return false;
+	if (in == "")return false;
 	//½T»{«Dªk¦r¤¸
-	for (auto i:in) {
-		if (!(isnum(i) || ischar(i) || checkoperator(i) || i==' ' || i=='.'||i=='=')) {
+ 	for (auto i:in) {
+		if (!(isnum(i) || ischar(i) || checkoperator(i) || i==' ' || i=='.')) {
 			return false;
 		}
 	}
-	//½T»{ÅÜ¼Æ¬Û¾F
-	int variablecount = 0;
-	for (int i = 0; i < in.length();i++) {
-		bool findVariable=false;
+	//§PÂ_¬A¸¹¥¿½T(¹ïºÙ)
+	if (!checkBrackets(in)) return false;
 
-		while (ischar(in[i]) )
-		{
-			if (!findVariable) {
-				if ( i != 0 && (  (in[i - 1] == ')') || (in[i - 1] == '!')  || (in[i - 1] == '.') || (in[i - 1] == '!')   )) return false;//ex:  (1+1)apple
-					findVariable = true;
+	int i = 0,lastPosition,endPosition=in.length()-1;
+
+	//­º²Å¸¹
+	if (in[i] == '*' || in[i] == '!' || in[i] == '/' || in[i] == '^' || in[i] == '=' || in[i] == ')' || in[i]=='.') {
+#ifdef Show
+		cout << "First element Error!\n";
+#endif 
+		return false;
+	}
+	//§À²Å¸¹
+	if (  checkoperator(in[endPosition]) && in[endPosition]!=')'  && in[endPosition] != '!'  ) {
+#ifdef Show
+		cout << "Final element Error!\n";
+#endif 
+		return false;
+	}
+
+	bool firstFind=false;
+	for (i,lastPosition = 0; i < in.length(); i++) {//¶}©l
+		if (in[i] == ' ')continue;
+		if (ischar(in[i])) {
+			if (!firstFind) {
+				firstFind = true;
+			}else {
+				if ((in[lastPosition] == '!' || isnum(in[lastPosition]) || ischar(in[lastPosition]))) {//ÅÜ¼Æ«e¤£¯à¦³ ! num char
+#ifdef Show
+					cout << "variable before Error!";
+#endif
+					return false;
+				}
 			}
-			i++;//§ä¨ìÅÜ¼Æ«á¤@¦ì
-	}
-	if (findVariable) {
-		while(in[i]==' ') {
-			i++;
+			while ( ischar(in[i]) || isnum(in[i])) {
+				i++;
+			}
+			i--;
+			lastPosition = i;//¬ö¿ýÅÜ¼Æ³Ì«á¦ì¸m
 		}
-	if ( ischar(in[i]) || isnum(in[i]) || in[i]=='('  )return false;//ÅÜ¼Æ«á±µ "ÅÜ¼Æ" "¼Æ¦r" '(' ³£¤£¦æ
-	}
-	}
-	//¹Bºâ¤l¤£¯à¬Û¾F(¥¿­t¸¹«e¥i¹J¨ì¹Bºâ¤l)
-	for (int i = 0; i < in.length(); i++) {
-	}*/
+		//==========='('
+		else if (in[i]=='(') {
+			if (!firstFind) {
+				firstFind = true;
+			}
+			else {
+				if (in[lastPosition] == '!' || isnum(in[lastPosition]) || ischar(in[lastPosition]) || in[lastPosition]==')') {
+#ifdef Show
+					cout << "( before Error!";
+#endif
+					return false;
+				}
+			}
+			lastPosition = i;
+			while (in[i+1]==' ') {
+				i++;
+			}
+			if ((checkoperator(in[i+1])&& (in[i+1]!='+' && in[i+1]!='-' && in[i + 1] != '(')  )&& i!=endPosition) {
+#ifdef Show
+				cout << "( after Error!";
+#endif
+				return false;
+			}
+		}
+		//===========')'
+		else if (in[i] == ')') {
+			
+			if (  checkoperator(in[lastPosition])&&in[lastPosition]!=')') {
+#ifdef Show
+				cout << " ) before Error!\n";
+#endif
+				return false;
+			}
+			lastPosition = i;
+			while (in[i + 1] == ' ') {// ) 123a 
+				i++;
+			}
+			if (!checkoperator(in[i + 1]) && i!=endPosition) {
+#ifdef Show
+				cout << ") after Error!\n";
+#endif
+				return false;
+			}
+		}
+		else if ( isnum(in[i]) ) {
+			int dotNums = 0,numNums=0;
+			if (!firstFind) {
+				firstFind = true;
+			}
+			else {
+				if ((ischar(in[lastPosition]) || isnum(in[lastPosition]) || in[lastPosition] == '!')) {
+#ifdef Show
+					cout << "num before Error!\n";
+#endif
+					return false;
+				}
+			}
+			while ( isnum(in[i]) || in[i]=='.' ) {
+				if (numNums==0 && in[i]=='.') {
+#ifdef Show
+					cout << "before  '.' is empty !\n";
+#endif
+					return false;
+				}else if (in[i] == '.')dotNums++;
+				else numNums++;
+
+				if (dotNums == 2) {
+#ifdef Show
+					cout << " '.' Error\n";
+#endif
+					return false;
+				}
+				i++;
+			}
+			i--;
+			lastPosition = i;
+		}
+		else if (in[i]=='.') {
+#ifdef Show
+			cout << " '.' Error\n";
+#endif
+			return false;
+		}
+		else if (is_operator(in[i])) {
+			switch (in[i])
+			{
+			case '*':
+				if (in[i + 1] == '*' || in[i + 1] == '!' || in[i + 1] == '/' || in[i + 1] == '^') {
+#ifdef Show
+					cout << " '*' Error\n";
+#endif
+					return false;
+				}
+				break;
+			case '/':
+				if (in[i + 1] == '+' || in[i + 1] == '-' || in[i + 1] == '*' || in[i + 1] == '/' || in[i + 1] == '^' || in[i + 1] == '!') {
+#ifdef Show
+					cout << " '/' Error\n";
+#endif
+					return false;
+				}
+				break;
+			case '^':
+				if ( in[i + 1] == '*' || in[i + 1] == '/' || in[i + 1] == '^' || in[i + 1] == '!' ) {
+#ifdef Show
+					cout << " '^' Error\n";
+#endif
+					return false;
+				}
+				break;
+			case '+':
+				if (in[i + 1] == '*' || in[i + 1] == '/' || in[i + 1] == '^' || in[i + 1] == '!') {
+#ifdef Show
+					cout << " '+' Error\n";
+#endif
+					return false;
+				}
+				break;
+			case '-':
+				if (in[i + 1] == '*' || in[i + 1] == '/' || in[i + 1] == '^' || in[i + 1] == '!') {
+#ifdef Show
+					cout << " '-' Error\n";
+#endif
+					return false;
+				}
+				break;
+			default:
+				break;
+			}
+
+
+			
+
+			lastPosition = i;
+		}
+		else {
+			lastPosition = i;
+		}
+}
 	return true;
 }
 
+
+//¬A¸¹
+bool Interpreter::checkBrackets(string in) {
+
+	vector<char>stack;
+	for (int i = 0; i < in.length(); i++) {
+		if (in[i]=='(') {
+			stack.push_back('(');
+		}
+		if (in[i] == ')') {
+			if (stack.size() && stack[0] == '('){
+				stack.pop_back();
+				continue;
+			}else{
+				return false;
+			}
+		}
+	}
+	if (!stack.size()) {
+		return true;
+	}else {
+#ifdef Show
+		cout << "Brackets Error!\n";
+#endif		
+		return false;
+	}
+		
+}
+//operator   "¤£"¥]§t¥¿­t ¿é¤JÀË´ú¥Î
 bool Interpreter::checkoperator(char c) {
 	string ope = "()!^+-*/";
 	for (int i = 0; i < ope.length(); i++) {
@@ -202,7 +407,7 @@ bool Interpreter::is_plus_minus(char c) {
 	return false;
 }
 
-//operator
+//operator ¥]§t¥¿­t
 bool Interpreter::is_operator(char c) {
 	string ope = "()!^+-*/#_";
 	for (int i = 0; i < ope.length(); i++) {

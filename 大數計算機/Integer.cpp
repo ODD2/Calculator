@@ -2,8 +2,9 @@
 
 
 
-Integer::Integer()
+Integer::Integer() : Decimal()
 {
+	pureInt = true;
 }
 
 Integer::~Integer()

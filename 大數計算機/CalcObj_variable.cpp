@@ -38,3 +38,4 @@ Decimal CalcObj_variable::Operate(vector<BaseCalcObj*> * Origin, int index)const
 	
 	return Interpreter::getGVM(id);
 }
+

@@ -67,9 +67,14 @@ void BaseCalcObj::Divide(vector<BaseCalcObj*> * Origin, int delimiter, vector<Ba
 }
 
 int BaseCalcObj::Prior_FindLowest(const vector<BaseCalcObj*> * Origin ) {
+	
 	if (Origin->size() == 0) {
 		cout << "Error! Formula is Empty!!" << endl;
+		return -1;
 	}
+
+
+
 	int ret_priority = INT32_MAX;
 	int ret_index = 0;
 

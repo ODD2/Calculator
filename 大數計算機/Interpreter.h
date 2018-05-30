@@ -9,7 +9,6 @@ class Interpreter
 public:
 	static map<string, Decimal> GLOBAL_VAR_MAP;
 	static  vector<BaseCalcObj*>* Converter(string);
-
 	static Decimal& getGVM(string);
 
 	Interpreter();
@@ -27,6 +26,8 @@ protected:
 	vector<BaseCalcObj*> * obj_list;
 
 	/* ==== tools === */
+	static bool checkBrackets(string);
+
 	static int checkMode(string, string &, string &);
 
 	static bool checkright(string);

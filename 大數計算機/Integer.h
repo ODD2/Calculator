@@ -8,7 +8,7 @@ public:
 	Integer(string);
 	Integer(const Decimal&);
 	Integer(const BigNum& rhs);
-	~Integer();
+	virtual ~Integer();
 
 	Integer& operator=(const Decimal& rhs) {
 		Init(rhs.Evaluate().PureInt());
