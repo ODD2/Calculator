@@ -46,7 +46,7 @@ Decimal CalcObj_assign::Operate(vector<BaseCalcObj*> * Obj_list, int index) cons
 	Decimal value= (*rhs)[rhs_next_index]->Operate(rhs, rhs_next_index);
 
 	//輸入值到變數
-	Interpreter::GLOBAL_VAR_MAP[id] = value.Evaluate();
+	Interpreter::GLOBAL_VAR_MAP[id] = move(value);
 
 	//回傳變數
 	return Interpreter::GLOBAL_VAR_MAP[id];

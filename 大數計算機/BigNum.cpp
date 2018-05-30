@@ -18,13 +18,22 @@ BigNum::BigNum(string value){
 		sign = false;
 		value.erase(value.begin());
 	}
+	bool hasfloatPoint=false;
 	//get value
 	for (int i = 0; i < value.size(); i++) {
-		if (value[i] == '.') {
+		if (isdigit(value[i]))	this->value.insert(this->value.begin(), value[i] - '0');
+		else if (value[i] == '.'&&!hasfloatPoint) {
+			hasfloatPoint = false;
 			floatPosition = value.size() - 1 - i;
 			continue;
 		}
-		this->value.insert(this->value.begin(), value[i] - '0');
+		else {
+			cout << "Error! BigNum Set to 0" << endl;
+			floatPosition = 0;
+			value.clear();
+			value.push_back(0);
+			return;
+		}
 	}
 
 	Num_CheckFraction();
