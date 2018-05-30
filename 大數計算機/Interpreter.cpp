@@ -54,13 +54,14 @@ vector<BaseCalcObj*>* Interpreter::Converter(string command) {
 
 #endif
 			GLOBAL_VAR_MAP[variableName] = Decimal();
+
 		}
 		else if (mode == 2)
 		{
 #ifdef Show
 			cout << "Create Interger " << variableName << " = " << expression << "___\n";
 #endif	
-			cout << "Integer Not Supported, Creating Decimal" << endl;
+
 			GLOBAL_VAR_MAP[variableName] = Decimal();
 		}
 
@@ -125,7 +126,7 @@ int Interpreter::checkMode(string in, string &var, string &expression) {//0¬°¥¿±
 			cout << "³]©w«ü¥O¿ù»~(¦P®É³]©w INT & DEC )!\n";
 #endif	
 			return 4;
-		}if ( varInt!=-1 && (varInt-0)>=4) {
+		}if ( varInt!=-1 && (varInt-0)>=4) {//================================int
 			for (int i = 4; i < varInt; i++) {
 				if (varCp[i] != ' ') {
 					#ifdef Show
@@ -134,12 +135,16 @@ int Interpreter::checkMode(string in, string &var, string &expression) {//0¬°¥¿±
 					return 4;
 				}
 			}
+			if (varCp[varInt+7]!=' ') {
+				return 4;
+			}
 			for (int i = varInt + 8; i < varCp.length();i++) {
 				if (varCp[i] == ' ')continue;
 				else if (getVar) {
 					#ifdef Show					
 						cout << "ÅÜ¼Æ¦WºÙ¿ù»~(set int var var)\n";
-					#endif					
+					#endif	
+						return 4;
 				}
 				if (ischar(varCp[i])) {
 					while ( (ischar(varCp[i]) || isnum(varCp[i])) && i<varCp.length() )
@@ -163,7 +168,7 @@ int Interpreter::checkMode(string in, string &var, string &expression) {//0¬°¥¿±
 				#endif
 				return 4;
 			}
-		}else if (varDec!=-1 && (varDec - 0) >= 4) {
+		}else if (varDec!=-1 && (varDec - 0) >= 4) {//========================================dec
 			for (int i = 4; i < varDec; i++) {
 				if (varCp[i] != ' ') {
 					#ifdef Show
@@ -172,12 +177,16 @@ int Interpreter::checkMode(string in, string &var, string &expression) {//0¬°¥¿±
 					return 4;
 				}
 			}
+			if (varCp[varInt + 7] != ' ') {
+				return 4;
+			}
 			for (int i = varDec + 8; i < varCp.length(); i++) {
 				if (varCp[i] == ' ')continue;
 				else if (getVar) {
 					#ifdef Show					
 						cout << "ÅÜ¼Æ¦WºÙ¿ù»~(set int var var)\n";
-					#endif					
+					#endif	
+					return 4;
 				}
 				if (ischar(varCp[i])) {
 					while ((ischar(varCp[i]) || isnum(varCp[i])) && i<varCp.length())
